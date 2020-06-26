@@ -1,0 +1,40 @@
+{
+  "manifest_version": 2,
+  "name": "DBLab Tools",
+  "version": "2.0",
+  "description": "HanYang University DB LAB Crawler",
+  "author": "Minwoo Park / Geunseong Jung",
+  "homepage_url": "http://db.hayang.ac.kr",
+  "icons": {
+    "16": "icons/icon.png",
+    "48": "icons/icon.png",
+    "128": "icons/icon.png"
+  },
+  "browser_action": {
+    "default_icon": "icons/icon.png",
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "inject/main.ts"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": [
+      "background/main.ts"
+    ],
+    "persistent": true
+  },
+  "permissions": [
+    "<all_urls>",
+    "pageCapture",
+    "tabs",
+    "storage"
+  ]
+}

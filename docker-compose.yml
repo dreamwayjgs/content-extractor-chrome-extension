@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+    node:        
+        image: node
+        volumes:
+            - .:/workspace:cached
+        stdin_open: true
+        tty: true
+    
