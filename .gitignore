@@ -1,5 +1,9 @@
 # Customs
 *.prop
+*.properties
+DBProperties.ts
+*.mhtml
+*.html
 
 # Logs
 logs

@@ -7,4 +7,6 @@ services:
             - .:/workspace:cached
         stdin_open: true
         tty: true
+        ports: 
+            - 53000:53000
     

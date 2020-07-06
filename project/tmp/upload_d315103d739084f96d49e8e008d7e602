@@ -1,0 +1,27 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://dbapp.hanyang.ac.kr/getup/
+Subject: Get up!
+Date: Mon, 6 Jul 2020 04:27:40 -0000
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--yuG0Z04Scjpo8vToLA7O2CiM77rLXez0SdalDWcGn7----"
+
+
+------MultipartBoundary--yuG0Z04Scjpo8vToLA7O2CiM77rLXez0SdalDWcGn7----
+Content-Type: text/html
+Content-ID: <frame-2FE67428B887B757EF21BEADCF98CA7C@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://dbapp.hanyang.ac.kr/getup/
+
+<!DOCTYPE html><html lang=3D"en"><head><meta http-equiv=3D"Content-Type" co=
+ntent=3D"text/html; charset=3DUTF-8"><meta name=3D"viewport" content=3D"wid=
+th=3Ddevice-width, initial-scale=3D1.0"><title>Get up!</title></head><body>=
+ <div id=3D"root"> <h1 id=3D"timer">Mon Jul 06 2020 13:27:40 GMT+0900 (=EB=
+=8C=80=ED=95=9C=EB=AF=BC=EA=B5=AD =ED=91=9C=EC=A4=80=EC=8B=9C)</h1> <form i=
+d=3D"alarm">=EC=8B=9C <input type=3D"number" min=3D"0" max=3D"23" name=3D"h=
+our">=EB=B6=84 <input type=3D"number" min=3D"0" max=3D"60" name=3D"minute" =
+value=3D"55"></form> </div>=20
+
+</body></html>
+------MultipartBoundary--yuG0Z04Scjpo8vToLA7O2CiM77rLXez0SdalDWcGn7------
