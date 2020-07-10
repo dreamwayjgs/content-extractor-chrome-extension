@@ -14,6 +14,14 @@ class Article implements ArticleType {
     this.id = id
     this.url_origin = url
   }
+
+  static fromArray(body: any[]) {
+    const articles = body.map((x: ArticleType) => {
+      const article = new Article(x.id, x.url_origin)
+      return article
+    })
+    return articles
+  }
 }
 
 export default Article

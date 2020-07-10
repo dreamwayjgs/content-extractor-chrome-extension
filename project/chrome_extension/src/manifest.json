@@ -22,7 +22,7 @@
       "js": [
         "inject/main.ts"
       ],
-      "run_at": "document_end"
+      "run_at": "document_start"
     }
   ],
   "background": {

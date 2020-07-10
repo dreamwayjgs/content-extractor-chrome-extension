@@ -32,7 +32,6 @@ function getPathFromMhtml(mhtml: any, index: number) {
   }
 }
 
-
 async function getMhtmls(): Promise<any[]> {
   const client = getPgClient()
   await client.connect()

@@ -1,5 +1,27 @@
 import { getPgClient } from '../helpers/connect-pg'
 import { Context } from 'koa'
+import mv from 'mv'
+
+export async function getArticleAction(ctx: Context) {
+  const idArray = ctx.request.query.id
+  const ids = typeof (idArray) === 'string' ? [idArray] : idArray.map((id: string) => parseInt(id))
+
+  const client = getPgClient()
+  try {
+    await client.connect()
+  } catch (err) {
+    errorMsg(ctx, err, "Connection refused. Try again")
+  }
+  try {
+    const sql = "SELECT id, url_origin FROM target_page WHERE id = ANY ($1)"
+    const res = await client.query(sql, [ids])
+    ctx.body = res.rows
+  }
+  catch (err) {
+    errorMsg(ctx, err, "Query Failed on Article")
+  }
+  client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
+}
 
 
 export async function getArticlesAction(ctx: Context) {
@@ -16,7 +38,6 @@ export async function getArticlesAction(ctx: Context) {
     let sql = "SELECT id, url_origin FROM target_page"
     if (from !== -1) {
       sql += " LIMIT $2 OFFSET $1"
-      console.log(sql)
       const values = [from, size]
       const res = await client.query(sql, values)
       ctx.body = res.rows
@@ -27,7 +48,7 @@ export async function getArticlesAction(ctx: Context) {
     }
   }
   catch (err) {
-    errorMsg(ctx, err, "Query Failed")
+    errorMsg(ctx, err, "Query Failed All Articles")
   }
   client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
 }
@@ -37,6 +58,7 @@ export async function getFailedArticlesAction(ctx: Context) {
   const size = (ctx.request.query.size !== undefined) ? parseInt(ctx.request.query.size) : -1
 
   const client = getPgClient()
+  console.log("Restart with failed pages")
   try {
     await client.connect()
   } catch (err) {
@@ -70,16 +92,30 @@ export async function postArticleAction(ctx: Context) {
     errorMsg(ctx, err, "Connection refused. Try again")
   }
   try {
+    const logQuery = "SELECT extraction_log FROM target_page WHERE id = $1"
+    const logQueryRes = await client.query(logQuery, [body.id])
+    const currentLogs = logQueryRes.rows[0].extraction_log
+    const newLog = Array.isArray(currentLogs) ? currentLogs : [currentLogs]
+
     const log = JSON.parse(body.log)
+    newLog.push(log)
     let sql = "UPDATE target_page SET extraction_log = $1, saved = $2"
-    let values = [log, log.saved]
+    let values = [JSON.stringify(newLog), log.saved]
     if (ctx.request.files && ctx.request.files.mhtml) {
+      const mhtmlPath = ctx.request.files.mhtml.path
+      mv(mhtmlPath, `./static/mhtml/${body.id}.mhtml`, () => {
+        console.log("File moved!")
+      })
       sql += ", mhtml = $3"
       values.push(ctx.request.files.mhtml)
     }
-    sql += "WHERE id = $4"
+    const webpage = JSON.parse(body.webpage)
+    sql += ", webpage = $4"
+    values.push(webpage)
+    sql += "WHERE id = $5"
     values.push(body.id)
     const res = await client.query(sql, values)
+    console.assert(res.rowCount === 1, "UPDATE FAILED")
     await client.query("COMMIT")
     ctx.body = "Received"
   }

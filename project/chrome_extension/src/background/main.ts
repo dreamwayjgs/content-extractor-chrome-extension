@@ -6,12 +6,15 @@ import 'chrome-extension-async'
 async function main() {
   console.log("hello backround")
   establish()
-  const crawler = await Crawler.createWithUrlsFromServer()
+  const crawler = await singleTest()
+  // const crawler = await Crawler.pickPagesWithId(ids)
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.command) {
       case "crawl":
         timestampedLog("Crawl requested")
-        chrome.tabs.create({ active: true }, async (tab) => {
+        chrome.tabs.create({ active: true }, tab => {
+          console.assert(tab.id !== undefined)
+          console.log("New tab updated")
           crawler.crawl(tab.id!)
         })
         break
@@ -24,6 +27,15 @@ async function main() {
         });
     }
   });
+}
+
+function singleTest(isTest = false) {
+  if (isTest) {
+    const ids = ["6852448"]
+    // const ids = ["6852448", "4613259"]
+    return Crawler.pickPagesWithId(ids)
+  }
+  else return Crawler.gatherPagesWithStatus("all");
 }
 
 main()
