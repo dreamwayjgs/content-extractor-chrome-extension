@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+  "name": "readability runner",
+  "version": "1.0",
+  "description": "HanYang University DB LAB readability runner",
+  "author": "Geunseong Jung",
+  "homepage_url": "http://db.hayang.ac.kr",
+  "icons": {
+    "16": "icons/icon.png",
+    "48": "icons/icon.png",
+    "128": "icons/icon.png"
+  },
+  "browser_action": {
+    "default_icon": "icons/icon.png",
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "inject/main.ts"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "scripts": [
+      "background/main.ts"
+    ]
+  },
+  "permissions": [
+    "<all_urls>",
+    "tabs",
+    "webNavigation"
+  ]
+}

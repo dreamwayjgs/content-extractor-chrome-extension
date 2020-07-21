@@ -6,7 +6,7 @@ import 'chrome-extension-async'
 async function main() {
   console.log("hello backround")
   establish()
-  const crawler = await singleTest()
+  const crawler = await singleTest(true)
   // const crawler = await Crawler.pickPagesWithId(ids)
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.command) {
@@ -31,8 +31,8 @@ async function main() {
 
 function singleTest(isTest = false) {
   if (isTest) {
+    // const ids = ["3819052", "5486199", "4344906", "3868535", "5477111", "3455302", "5256691", "3460924", "4914667", "4834017", "3374749", "7027811", "4791863", "4442317", "3593219", "5538150", "3471066", "1975"]
     const ids = ["6852448"]
-    // const ids = ["6852448", "4613259"]
     return Crawler.pickPagesWithId(ids)
   }
   else return Crawler.gatherPagesWithStatus("all");

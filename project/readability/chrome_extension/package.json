@@ -1,0 +1,19 @@
+{
+  "name": "readability-checker",
+  "version": "1.0.0",
+  "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-web-extension": "^1.6.1",
+    "typescript": "^3.9.5"
+  },
+  "scripts": {
+    "build": "parcel build src/manifest.json",
+    "watch": "parcel watch src/manifest.json --no-hmr"
+  },
+  "dependencies": {
+    "@types/chrome": "^0.0.117",
+    "@types/node": "^14.0.23",
+    "chrome-extension-async": "^3.4.1"
+  }
+}

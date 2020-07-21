@@ -1,6 +1,5 @@
 // import mhtml2html from "mhtml2html";
 import { getHtmlAsString } from './mhtmlfile'
-import { handlingPg } from './pg-handler'
 import { writeFileSync, readdirSync } from 'fs'
 
 async function main() {

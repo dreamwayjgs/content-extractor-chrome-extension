@@ -8,7 +8,7 @@ class WebPage {
 
   constructor(document: Document) {
     WebPage.IND = 0;
-    this._root_node = document.getElementsByTagName('body')[0];
+    this._root_node = document.body;
     this._nodes = [];
   }
 

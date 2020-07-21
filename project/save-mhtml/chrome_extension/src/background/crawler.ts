@@ -19,6 +19,7 @@ class Crawler {
     this.articles = articles
     this.onLoadListener = this.saveOnLoad.bind(this)
   }
+
   static async gatherPagesWithStatus(status: PageStatus, from?: number, size?: number) {
     let filter: ArticlePath = ""
     if (status === "failed") filter = "/failed";
@@ -26,11 +27,13 @@ class Crawler {
     timestampedLog(articles)
     return new Crawler(articles)
   }
+
   static async pickPagesWithId(ids: string[]) {
     const articles = await getArticlesById(ids)
-    timestampedLog(articles)
+    timestampedLog("TARGETS: ", articles)
     return new Crawler(articles)
   }
+
   crawl(tabId: number) {
     timestampedLog("Crawl starts...")
     this.tabId = tabId
@@ -43,10 +46,11 @@ class Crawler {
     const frameId = details.frameId
     if (frameId !== 0) return;
 
-
+    timestampedLog("REQUEST preprocessing in 5 seconds")
     setTimeout(() => {
       const tabId = details.tabId
       const articleId = this.articles[this.currentIndex].id
+      timestampedLog("REQUEST preprocessing NOW")
       chrome.tabs.sendMessage(tabId, { command: "crawl" }, async res => {
         const lastError = chrome.runtime.lastError
         if (lastError) {
