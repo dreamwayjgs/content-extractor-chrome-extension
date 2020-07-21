@@ -6,30 +6,38 @@ interface PageResult {
   extraction_log?: any
 }
 
-export async function analyzeExtractionLog() {
+export async function analyzeExtractionLog(): Promise<([any, any])> {
   const client = getPgClient()
   await client.connect()
   const sql = "SELECT id, extraction_log FROM target_page"
   try {
     const res = await client.query(sql)
     const rows = res.rows
+    console.assert(rows.length > 0, "Empty DB!")
     console.log("Counts: ", rows.length)
-    const extracted = rows.map(countJsonLength).filter(e => e)
+    const extracted = rows.map(countJsonLength).filter(e => {
+      if (e[1]) return e
+    })
+    const missed = rows.map(countJsonLength).filter(e => {
+      if (!e[1]) return e
+    })
     client.end().catch(err => { console.log(err, "Error during client disconnection") })
-    return extracted
+    return [extracted, missed]
   } catch (e) {
-    console.log(e)
+    console.log("error", e)
+    return [null, null]
   }
 }
 
 function countJsonLength(row: PageResult, index: number) {
   const id = row.id
   const log = row.extraction_log
-  if (log.length === undefined) {
-    return undefined
+
+  if (!Array.isArray(log)) {
+    return [id, undefined]
   }
   else if (log.length === 1) {
-    return [id, log.timestamp]
+    return [id, log[0]]
   }
   else {
     return [id, latestTimestamp(log)]

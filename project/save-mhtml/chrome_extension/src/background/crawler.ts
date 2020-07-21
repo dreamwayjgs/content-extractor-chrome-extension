@@ -4,20 +4,23 @@ import Article, { ArticlePath } from '../entities/Article'
 
 type PageStatus = "all" | "failed" | "success"
 type CrawlStatus = "idle" | "running" | "done"
-const MINUTE = 60000
-const MAX_TIMEOUT = 1 * MINUTE
+
+const MAX_PAGE_LOAD_TIMEOUT = 20000
+const MAX_PREPROCESS_TIMEOUT = 5000
 
 class Crawler {
   articles: Article[]
   currentIndex: number = 0
   status: CrawlStatus = "idle"
-  timeout?: number
   tabId: number = chrome.tabs.TAB_ID_NONE
+  saveStarted = false
   onLoadListener: (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => void
+  onCommittedListener: (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => void
 
   constructor(articles: Article[]) {
     this.articles = articles
     this.onLoadListener = this.saveOnLoad.bind(this)
+    this.onCommittedListener = this.saveOnTimeoutForDelayedPage.bind(this)
   }
 
   static async gatherPagesWithStatus(status: PageStatus, from?: number, size?: number) {
@@ -39,54 +42,77 @@ class Crawler {
     this.tabId = tabId
 
     chrome.webNavigation.onCompleted.addListener(this.onLoadListener)
+    chrome.webNavigation.onCommitted.addListener(this.onCommittedListener)
     this.loadPage()
+  }
+
+  saveOnTimeoutForDelayedPage(details: chrome.webNavigation.WebNavigationFramedCallbackDetails) {
+    const frameId = details.frameId
+    if (frameId !== 0) return;
+
+    timestampedLog(`Wait ${MAX_PAGE_LOAD_TIMEOUT / 1000} seconds from now on`)
+    setTimeout(() => {
+      if (!this.saveStarted) {
+        this.saveStarted = true
+        timestampedLog("Force saving")
+        this.savePage(details, true)
+      }
+    }, MAX_PAGE_LOAD_TIMEOUT)
   }
 
   saveOnLoad(details: chrome.webNavigation.WebNavigationFramedCallbackDetails) {
     const frameId = details.frameId
     if (frameId !== 0) return;
 
-    timestampedLog("REQUEST preprocessing in 5 seconds")
-    setTimeout(() => {
-      const tabId = details.tabId
-      const articleId = this.articles[this.currentIndex].id
-      timestampedLog("REQUEST preprocessing NOW")
-      chrome.tabs.sendMessage(tabId, { command: "crawl" }, async res => {
-        const lastError = chrome.runtime.lastError
-        if (lastError) {
-          timestampedLog("error occured")
-          return
-        }
+    timestampedLog("Loaded")
+    if (!this.saveStarted) {
+      this.saveStarted = true
+      timestampedLog(`[LOAD] REQUEST preprocessing in ${MAX_PREPROCESS_TIMEOUT / 1000} seconds`)
+      setTimeout(() => {
+        this.savePage(details)
+      }, MAX_PREPROCESS_TIMEOUT, this)
+    }
+    else timestampedLog("already saving")
+  }
 
-        timestampedLog("Receiving end of preprocessing")
-        timestampedAssert(res.status, "page not completely loaded. force indexing")
-        const numOfFrames = (await chrome.webNavigation.getAllFrames({ tabId: tabId }))?.length
+  savePage(details: chrome.webNavigation.WebNavigationCallbackDetails, forced = false) {
+    const tabId = details.tabId
+    const articleId = this.articles[this.currentIndex].id
+    const normallyLoaded = !forced
+    chrome.tabs.sendMessage(tabId, { command: "crawl" }, async res => {
+      const lastError = chrome.runtime.lastError
+      if (lastError) {
+        timestampedLog("error occured")
+        return
+      }
 
-        try {
-          timestampedLog("Saving pages...", articleId, details.url)
-          const page = await chrome.pageCapture.saveAsMHTML({ tabId: tabId })
-          postArticle(articleId, {
-            timestamp: new Date().toISOString(),
-            status: "Success",
-            saved: true,
-            pageStatus: res.status,
-            numOfFrames: numOfFrames
-          }, page, res.webpage)
-        } catch (e) {
-          timestampedLog("Saving Failed")
-          postArticle(articleId, {
-            timestamp: new Date().toISOString(),
-            status: "Failed",
-            saved: false,
-            pageStatus: res.status,
-            numOfFrames: numOfFrames
-          })
-        }
-        this.clearTimeoutHandler()
-        this.currentIndex++
-        this.loadPage()
-      })
-    }, 5000)
+      timestampedAssert(normallyLoaded, "page not completely loaded. force indexing")
+      const numOfFrames = (await chrome.webNavigation.getAllFrames({ tabId: tabId }))?.length
+
+      try {
+        timestampedLog("Saving pages...", articleId, details.url)
+        const page = await chrome.pageCapture.saveAsMHTML({ tabId: tabId })
+        postArticle(articleId, {
+          timestamp: new Date().toISOString(),
+          status: "Success",
+          saved: true,
+          pageStatus: normallyLoaded,
+          numOfFrames: numOfFrames
+        }, page, res.webpage)
+      } catch (e) {
+        timestampedLog("Saving Failed")
+        postArticle(articleId, {
+          timestamp: new Date().toISOString(),
+          status: "Failed",
+          saved: false,
+          pageStatus: normallyLoaded,
+          numOfFrames: numOfFrames
+        })
+      }
+      this.currentIndex++
+      timestampedLog("Next page")
+      this.loadPage()
+    })
   }
 
   loadPage() {
@@ -99,36 +125,15 @@ class Crawler {
 
     const url = this.articles[index].url_origin
     timestampedLog("Open page", url)
-    chrome.tabs.update(tabId, { url: url }, tab => {
-      timestampedLog("Tab updated, start timeout")
-      this.timeoutHandler()
-    })
-  }
-
-  timeoutHandler() {
-    const articleId = this.articles[this.currentIndex].id
-    this.timeout = setTimeout(() => {
-      timestampedLog("%cExpired! Load next page", "color:red;font-size:4rem;")
-      postArticle(articleId, {
-        timestamp: new Date().toISOString(),
-        status: "Failed",
-        saved: false,
-        pageStatus: "Expired"
-      })
-      this.currentIndex++
-      this.loadPage()
-    }, MAX_TIMEOUT)
-    timestampedLog(`Timeout Set in ${this.tabId}. # of timeout is ${this.timeout}`)
-  }
-
-  clearTimeoutHandler() {
-    timestampedLog(`Job done in ${this.tabId}. Clear timeout: ${this.timeout}`)
-    clearTimeout(this.timeout)
+    this.saveStarted = false
+    chrome.tabs.update(tabId, { url: url })
   }
 
   finish(tabId: number) {
     timestampedLog("Jobs done!", this)
     chrome.webNavigation.onCompleted.removeListener(this.onLoadListener)
+    chrome.webNavigation.onCommitted.removeListener(this.onCommittedListener)
+
     this.currentIndex = 0
   }
 

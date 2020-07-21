@@ -95,7 +95,7 @@ export async function postArticleAction(ctx: Context) {
     const logQuery = "SELECT extraction_log FROM target_page WHERE id = $1"
     const logQueryRes = await client.query(logQuery, [body.id])
     const currentLogs = logQueryRes.rows[0].extraction_log
-    const newLog = Array.isArray(currentLogs) ? currentLogs : [currentLogs]
+    const newLog = Array.isArray(currentLogs) ? currentLogs : currentLogs !== null ? [currentLogs] : []
 
     const log = JSON.parse(body.log)
     newLog.push(log)
