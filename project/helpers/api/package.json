@@ -25,6 +25,7 @@
     "start:dev": "pm2 start dist/app.js --watch --no-daemon"
   },
   "devDependencies": {
+    "@prisma/cli": "^2.3.0",
     "typescript": "^3.9.6"
   }
 }
