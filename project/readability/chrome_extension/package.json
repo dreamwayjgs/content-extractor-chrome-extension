@@ -3,17 +3,35 @@
   "version": "1.0.0",
   "license": "MIT",
   "devDependencies": {
+    "@types/jest": "^26.0.5",
+    "jest": "^26.1.0",
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-web-extension": "^1.6.1",
     "typescript": "^3.9.5"
   },
   "scripts": {
     "build": "parcel build src/manifest.json",
-    "watch": "parcel watch src/manifest.json --no-hmr"
+    "watch": "parcel watch src/manifest.json --no-hmr",
+    "test": "jest"
   },
   "dependencies": {
     "@types/chrome": "^0.0.117",
     "@types/node": "^14.0.23",
     "chrome-extension-async": "^3.4.1"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testRegex": "\\.test\\.ts$",
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "globals": {
+      "ts-jest": {
+        "enableTsDiagnostics": true
+      }
+    }
   }
 }

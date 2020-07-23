@@ -2,6 +2,7 @@
   "name": "save-mhtml",
   "devDependencies": {
     "@types/whatwg-fetch": "^0.0.33",
+    "jest": "^26.1.0",
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-web-extension": "^1.6.1",
     "typescript": "^3.9.5"
@@ -12,6 +13,7 @@
   },
   "dependencies": {
     "@types/chrome": "^0.0.117",
+    "@types/jest": "^26.0.5",
     "chrome-extension-async": "^3.4.1"
   }
 }
