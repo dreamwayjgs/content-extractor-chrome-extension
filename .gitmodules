@@ -1,0 +1,3 @@
+[submodule "project/readability/chrome_extension/src/inject/extractors/readability"]
+	path = project/readability/chrome_extension/src/inject/extractors/readability
+	url = https://github.com/mozilla/readability.git

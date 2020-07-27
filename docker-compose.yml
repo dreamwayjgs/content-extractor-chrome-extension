@@ -4,7 +4,7 @@ services:
     node:        
         image: node
         volumes:
-            - .:/workspace:delegated
+            - .:/workspace
         stdin_open: true
         tty: true
         ports: 
