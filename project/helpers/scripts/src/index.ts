@@ -8,13 +8,28 @@ async function main() {
   if (result)
     writeResult(result)
   const [passed, failed] = countRecent(result!)
-  writeResult(failed, "failed.txt")
-  writeResult(missed.map((e: [any, any]) => {
-    console.log(typeof (e[0]))
-    return parseInt(e[0])
-  }
-  ), "missed-pg.txt")
-  writeResult(missed.map((e: [any, any]) => e[0]), "missed.txt")
+  console.log("passed ", passed.length)
+  console.log("failed ", failed.length)
+  const [normal, forced] = countForcedCrawl(passed!)
+  // writeResult(failed, "failed.txt")
+  // writeResult(missed.map((e: [any, any]) => {
+  //   console.log(typeof (e[0]))
+  //   return parseInt(e[0])
+  // }
+  // ), "missed-pg.txt")
+  // writeResult(missed.map((e: [any, any]) => e[0]), "missed.txt")
+}
+
+function countForcedCrawl(logs: any[]) {
+  let normal: any[] = []
+  let forced: any[] = []
+  logs.forEach(row => {
+    if (row[1].pageStatus) normal.push(row);
+    else forced.push(row);
+  })
+  console.log(normal.length)
+  console.log(forced.length)
+  return [normal, forced]
 }
 
 function countRecent(logs: any[]) {

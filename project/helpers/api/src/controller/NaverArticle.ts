@@ -83,6 +83,21 @@ export async function getFailedArticlesAction(ctx: Context) {
   client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
 }
 
+export async function getArticleFileAction(ctx: Context) {  
+  const id: number = parseInt(ctx.request.query.id) ?? errorMsg(ctx, "ID must be a number")
+  const client = getPgClient()
+  await client.connect()
+  
+  try {
+    const sql = "SELECT id, url_origin, extraction_log FROM target_page WHERE id = ($1)"
+    const res = await client.query(sql, id)    
+  }
+  catch(err) {
+    errorMsg(ctx, err, "")
+  }
+
+}
+
 export async function postArticleAction(ctx: Context) {
   const body = ctx.request.body
   const client = getPgClient()
@@ -103,7 +118,7 @@ export async function postArticleAction(ctx: Context) {
     let values = [JSON.stringify(newLog), log.saved]
     if (ctx.request.files && ctx.request.files.mhtml) {
       const mhtmlPath = ctx.request.files.mhtml.path
-      mv(mhtmlPath, `./static/mhtml/${body.id}.mhtml`, () => {
+      mv(mhtmlPath, getMhtmlFilePath(body.id), () => {
         console.log("File moved!")
       })
       sql += ", mhtml = $3"
@@ -133,4 +148,9 @@ function errorMsg(ctx: Context, err: any, msg?: string) {
     status: "error",
     data: msg
   }
+}
+
+function getMhtmlFilePath(id: string | number) {
+  return `./static/mhtml/${id}.mhtml`
+
 }

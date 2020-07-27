@@ -3,7 +3,7 @@
 *.properties
 DBProperties.ts
 *.mhtml
-*.html
+tmp/
 
 # Logs
 logs

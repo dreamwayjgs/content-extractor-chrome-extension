@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: "chrome extension backup",
-    script: 'dist/app.js',
+    script: 'dist/run.js',
     watch: true,
     ignore_watch: [
       "node_modules",
