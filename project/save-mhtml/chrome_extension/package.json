@@ -1,10 +1,12 @@
 {
   "name": "save-mhtml",
   "devDependencies": {
+    "@types/sass": "^1.16.0",
     "@types/whatwg-fetch": "^0.0.33",
     "jest": "^26.1.0",
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-web-extension": "^1.6.1",
+    "sass": "^1.26.10",
     "typescript": "^3.9.5"
   },
   "scripts": {
@@ -14,6 +16,8 @@
   "dependencies": {
     "@types/chrome": "^0.0.117",
     "@types/jest": "^26.0.5",
-    "chrome-extension-async": "^3.4.1"
+    "@types/jquery": "^3.5.1",
+    "chrome-extension-async": "^3.4.1",
+    "jquery": "^3.5.1"
   }
 }

@@ -1,5 +1,5 @@
 import { timestampedLog, timestampedAssert } from '../modules/debugger'
-import Article, { ArticleType, ArticlePath } from '../entities/Article'
+import Article, { ArticleType, ArticlePath, AnsweredArticle } from '../entities/Article'
 
 
 const endpoint = "http://127.0.0.1:53000"
@@ -24,15 +24,28 @@ export async function getArticlesUrl(filter: ArticlePath, from?: number, size: n
   return articles
 }
 
-export async function getArticlesById(ids: string[]) {
+export async function getArticlesById(ids: number[]) {
   const params: URLSearchParams = new URLSearchParams()
   ids.forEach(id => {
-    params.append('id', id)
+    params.append('id', id.toString())
   })
   const target = '/article'
   const url = `${endpoint}${target}?${params.toString()}`
   const body = await fetch(url).then(res => res.json())
   return Article.fromArray(body)
+}
+
+export function getArticleFile(id: number) {
+  const target = '/article/file'
+  const url = `${endpoint}${target}?id=${id}`
+  return url
+}
+
+export async function getArticleCheckedAnswer(aid: number) {
+  const target = '/article/answer'
+  const url = `${endpoint}${target}?aid=${aid}`
+  const body = await fetch(url).then(res => res.json())
+  return body
 }
 
 export async function postArticle(id: number, log?: any, mhtml?: any, webpage?: any, subPath = "") {

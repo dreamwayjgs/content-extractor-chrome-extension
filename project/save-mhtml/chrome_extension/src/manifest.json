@@ -35,6 +35,8 @@
     "pageCapture",
     "tabs",
     "storage",
-    "webNavigation"
+    "webNavigation",
+    "downloads",
+    "downloads.open"
   ]
 }

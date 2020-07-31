@@ -1,4 +1,5 @@
 import { getPgClient } from '../helpers/connect-pg'
+import { mhtmlHandler } from './FileHandler'
 import { Context } from 'koa'
 import mv from 'mv'
 
@@ -83,19 +84,46 @@ export async function getFailedArticlesAction(ctx: Context) {
   client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
 }
 
-export async function getArticleFileAction(ctx: Context) {  
+export async function getArticleFileAction(ctx: Context) {
   const id: number = parseInt(ctx.request.query.id) ?? errorMsg(ctx, "ID must be a number")
+  console.log("File id: ", id)
   const client = getPgClient()
   await client.connect()
-  
+
   try {
     const sql = "SELECT id, url_origin, extraction_log FROM target_page WHERE id = ($1)"
-    const res = await client.query(sql, id)    
+    const res = await client.query(sql, [id])
+    const filename = res.rows[0].id
+    const file = await mhtmlHandler(filename)
+
+    ctx.set("Content-disposition", `attachment; filename=${id}.mhtml`)
+    ctx.statusCode = 200
+    ctx.body = file
+    console.log("Transferred")
   }
-  catch(err) {
+  catch (err) {
     errorMsg(ctx, err, "")
   }
+  client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
+}
 
+export async function getArticleCheckedAnswerAction(ctx: Context) {
+  const aid: number = parseInt(ctx.request.query.aid) ?? errorMsg(ctx, "ID must be a number")
+  console.log("Requested answer: ", aid)
+  const client = getPgClient()
+  await client.connect()
+
+  try {
+    const sql = `select t_user.name, t_answer.*
+    from naver_check_user as t_user, naver_check_answer as t_answer 
+    where t_user.uid = t_answer.uid and t_user.uid = any (ARRAY[15, 14]) and t_answer.aid = ($1)`
+    const res = await client.query(sql, [aid])
+    ctx.body = res.rows
+  }
+  catch (err) {
+    errorMsg(ctx, err, "")
+  }
+  client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
 }
 
 export async function postArticleAction(ctx: Context) {

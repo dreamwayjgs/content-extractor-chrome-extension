@@ -14,13 +14,13 @@ class Crawler {
   status: CrawlStatus = "idle"
   tabId: number = chrome.tabs.TAB_ID_NONE
   saveStarted = false
-  onLoadListener: (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => void
-  onCommittedListener: (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => void
+  onLoadAction: (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => void
+  onCommittedAction: (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => void
 
   constructor(articles: Article[]) {
     this.articles = articles
-    this.onLoadListener = this.saveOnLoad.bind(this)
-    this.onCommittedListener = this.saveOnTimeoutForDelayedPage.bind(this)
+    this.onLoadAction = this.saveOnLoad.bind(this)
+    this.onCommittedAction = this.saveOnTimeoutForDelayedPage.bind(this)
   }
 
   static async gatherPagesWithStatus(status: PageStatus, from?: number, size?: number) {
@@ -31,7 +31,7 @@ class Crawler {
     return new Crawler(articles)
   }
 
-  static async pickPagesWithId(ids: string[]) {
+  static async pickPagesWithId(ids: number[]) {
     const articles = await getArticlesById(ids)
     timestampedLog("TARGETS: ", articles)
     return new Crawler(articles)
@@ -41,8 +41,8 @@ class Crawler {
     timestampedLog("Crawl starts...")
     this.tabId = tabId
 
-    chrome.webNavigation.onCompleted.addListener(this.onLoadListener)
-    chrome.webNavigation.onCommitted.addListener(this.onCommittedListener)
+    chrome.webNavigation.onCompleted.addListener(this.onLoadAction)
+    chrome.webNavigation.onCommitted.addListener(this.onCommittedAction)
     this.loadPage()
   }
 
@@ -131,8 +131,8 @@ class Crawler {
 
   finish(tabId: number) {
     timestampedLog("Jobs done!", this)
-    chrome.webNavigation.onCompleted.removeListener(this.onLoadListener)
-    chrome.webNavigation.onCommitted.removeListener(this.onCommittedListener)
+    chrome.webNavigation.onCompleted.removeListener(this.onLoadAction)
+    chrome.webNavigation.onCommitted.removeListener(this.onCommittedAction)
 
     this.currentIndex = 0
   }

@@ -1,5 +1,8 @@
 import { greet } from "./controller/hello"
-import { getArticleAction, getArticlesAction, getFailedArticlesAction, postArticleAction } from "./controller/NaverArticle"
+import {
+  getArticleAction, getArticlesAction,
+  getFailedArticlesAction, postArticleAction, getArticleFileAction, getArticleCheckedAnswerAction
+} from "./controller/NaverArticle"
 import { postFileAction } from "./controller/FileHandler"
 import { getQueryBoardAction } from './controller/queryboard'
 
@@ -23,6 +26,16 @@ export const AppRoutes = [
     path: "/article",
     method: "get",
     action: getArticleAction
+  },
+  {
+    path: "/article/answer",
+    method: "get",
+    action: getArticleCheckedAnswerAction
+  },
+  {
+    path: "/article/file",
+    method: "get",
+    action: getArticleFileAction
   },
   {
     path: "/article",

@@ -11,3 +11,9 @@ export async function postFileAction(ctx: Context) {
   console.log(file.toString('utf8'))
   writeFileSync("test.mhtml", file.toString('utf8'))
 }
+
+export async function mhtmlHandler(filename: string) {
+  const filepath = `static/mhtml/${filename}.mhtml`
+  const file = readFileSync(filepath)
+  return file
+}

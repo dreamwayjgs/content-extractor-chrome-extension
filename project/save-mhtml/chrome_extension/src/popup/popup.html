@@ -4,15 +4,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .btn {
+      width: 300px;
+    }
+    .arrow {
+      width: 100%;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+    integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+    crossorigin="anonymous"></script>
   <title>Popup</title>
 </head>
 
 <body>
-  <div>
-    <a id="save" href="#">save</a>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Crawler</h5>
+      <div>
+        <a class="btn btn-outline-primary" id="save" href="#">save</a>
+      </div>
+      <div>
+        <a class="btn btn-outline-primary" id="saveNow" href="#">just saving!</a>
+      </div>
+    </div>
   </div>
-  <div>
-    <a id="saveNow" href="#">just saving!</a>
+  <div class="card" id="curation-card">
+    <div class="card-body">
+      <h5 class="card-title">Curation</h5>
+      <div>
+        <a class="btn btn-outline-primary start" href="#">start</a>
+      </div>      
+      <div class="btn-group" role="group" aria-label="Curation Control">
+        <a class="btn btn-outline-primary arrow prev" href="#">prev</a>
+        <a class="btn btn-outline-primary arrow next" href="#">next</a>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Extractor</h5>
+      <div>
+        <a class="btn btn-outline-primary" id="readability" href="#">readability</a>
+      </div>
+      <div>
+        <a class="btn btn-outline-primary" id="center-to-fence" href="#">center-to-fence</a>
+      </div>
+    </div>
   </div>
   <script src="popup.ts"></script>
 </body>
