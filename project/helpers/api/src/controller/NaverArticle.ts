@@ -1,5 +1,6 @@
 import { getPgClient } from '../helpers/connect-pg'
 import { mhtmlHandler } from './FileHandler'
+import { errorMsg } from './Core'
 import { Context } from 'koa'
 import mv from 'mv'
 
@@ -32,10 +33,6 @@ export async function getArticlesAction(ctx: Context) {
   const client = getPgClient()
   try {
     await client.connect()
-  } catch (err) {
-    errorMsg(ctx, err, "Connection refused. Try again")
-  }
-  try {
     let sql = "SELECT id, url_origin FROM target_page"
     if (from !== -1) {
       sql += " LIMIT $2 OFFSET $1"
@@ -62,10 +59,6 @@ export async function getFailedArticlesAction(ctx: Context) {
   console.log("Restart with failed pages")
   try {
     await client.connect()
-  } catch (err) {
-    errorMsg(ctx, err, "Connection refused. Try again")
-  }
-  try {
     let sql = "SELECT id, url_origin FROM target_page where saved = false"
     if (from !== -1) {
       sql += " LIMIT $2 OFFSET $1"
@@ -93,18 +86,20 @@ export async function getArticleFileAction(ctx: Context) {
   try {
     const sql = "SELECT id, url_origin, extraction_log FROM target_page WHERE id = ($1)"
     const res = await client.query(sql, [id])
-    const filename = res.rows[0].id
-    const file = await mhtmlHandler(filename)
 
+    const filename = res.rows[0].id
+    const file = mhtmlHandler(filename)
     ctx.set("Content-disposition", `attachment; filename=${id}.mhtml`)
     ctx.statusCode = 200
     ctx.body = file
+
+    await client.end()
+    console.log("End Successful")
     console.log("Transferred")
   }
   catch (err) {
     errorMsg(ctx, err, "")
   }
-  client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
 }
 
 export async function getArticleCheckedAnswerAction(ctx: Context) {
@@ -116,7 +111,7 @@ export async function getArticleCheckedAnswerAction(ctx: Context) {
   try {
     const sql = `select t_user.name, t_answer.*
     from naver_check_user as t_user, naver_check_answer as t_answer 
-    where t_user.uid = t_answer.uid and t_user.uid = any (ARRAY[15, 14]) and t_answer.aid = ($1)`
+    where t_user.uid = t_answer.uid and t_user.uid = any (ARRAY[11, 14]) and t_answer.aid = ($1)`
     const res = await client.query(sql, [aid])
     ctx.body = res.rows
   }
@@ -167,15 +162,6 @@ export async function postArticleAction(ctx: Context) {
     errorMsg(ctx, err, "Query Failed")
   }
   client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
-}
-
-function errorMsg(ctx: Context, err: any, msg?: string) {
-  console.log(msg)
-  console.log(err.stack)
-  ctx.body = {
-    status: "error",
-    data: msg
-  }
 }
 
 function getMhtmlFilePath(id: string | number) {

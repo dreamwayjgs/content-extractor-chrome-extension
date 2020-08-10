@@ -1,5 +1,5 @@
 import Article from "../entities/Article"
-import { getArticlesById, getArticleFile, getArticlesUrl, getArticleCheckedAnswer } from "./server"
+import { getArticlesById, getArticleFile, getArticlesUrl, getArticleCheckedAnswer, postNoContentAnswer } from "./server"
 import { timestampedLog } from "../modules/debugger"
 
 
@@ -10,11 +10,14 @@ class Curator {
     currentIndex: number = 0
     onDownloadAction: (downloadDelta: chrome.downloads.DownloadDelta) => void
     onPageLoadAction: (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => void
+    onMessageAction: (request: any, sender: chrome.runtime.MessageSender,
+        sendResponse: (response: any) => void) => void
 
     constructor(articles: Article[]) {
         this.articles = articles
         this.onDownloadAction = this.openOnDownloaded.bind(this)
         this.onPageLoadAction = this.loadAnswer.bind(this)
+        this.onMessageAction = this.messageFromContentScriptHandler.bind(this)
     }
 
     static getCurator() {
@@ -39,6 +42,7 @@ class Curator {
     start(tabId: number) {
         chrome.downloads.onChanged.addListener(this.onDownloadAction)
         chrome.webNavigation.onCompleted.addListener(this.onPageLoadAction)
+        chrome.runtime.onMessage.addListener(this.onMessageAction)
         this.tabId = tabId
         this.loadPage(this.articles[0])
     }
@@ -71,11 +75,13 @@ class Curator {
     }
 
     finish() {
-        // chrome.downloads.onChanged.removeListener(this.onDownloadAction)
+        chrome.downloads.onChanged.removeListener(this.onDownloadAction)
+        chrome.webNavigation.onCompleted.removeListener(this.onPageLoadAction)
+        chrome.runtime.onMessage.removeListener(this.onMessageAction)
     }
 
     loadPage(article: Article) {
-        if (article.filename) {
+        if (article.filename && article.filename !== "file.txt") {
             timestampedLog("Open previously downloaded page")
             this.openPage(article)
         }
@@ -111,14 +117,13 @@ class Curator {
     }
 
     loadAnswer(details: chrome.webNavigation.WebNavigationFramedCallbackDetails) {
+        const frameId = details.frameId
+        const targetUrl = new URL(details.url)
+        if (frameId !== 0 || targetUrl.protocol === "chrome:") return;
+
         setTimeout(() => {
-            const frameId = details.frameId
-            if (frameId !== 0) return;
             const article = this.articles[this.currentIndex]
-            timestampedLog("Loading Compeleted")
             getArticleCheckedAnswer(article.id).then(body => {
-                timestampedLog("This page answers: ", body)
-                timestampedLog("Called on ", frameId)
                 // this.sendAnswerDataToPopup(body)
                 this.sendAnswerDataToContentScript(body)
             })
@@ -135,13 +140,29 @@ class Curator {
     }
 
     sendAnswerDataToContentScript(answerData: any) {
-        timestampedLog("To content", answerData)
         chrome.tabs.sendMessage(this.tabId, { command: "curation", answerData: answerData }, () => {
             const lastError = chrome.runtime.lastError
             if (lastError)
                 timestampedLog("In content", lastError)
         })
     }
+
+    messageFromContentScriptHandler(request: any, sender: chrome.runtime.MessageSender,
+        sendResponse: (response: any) => void): void {
+        const info = request.info
+        if (info === "curation-no-main-content") {
+            timestampedLog("No main content from cs")
+            timestampedLog("Aritcle Now ", this.articles[this.currentIndex])
+            this.sendNoContent(request.answer)
+        }
+    }
+
+    sendNoContent(answer: any) {
+        const aid = answer.aid
+        const uid = answer.uid
+        postNoContentAnswer(aid, uid)
+    }
+
 }
 
 export default Curator

@@ -48,7 +48,7 @@ export async function getArticleCheckedAnswer(aid: number) {
   return body
 }
 
-export async function postArticle(id: number, log?: any, mhtml?: any, webpage?: any, subPath = "") {
+export function postArticle(id: number, log?: any, mhtml?: any, webpage?: any, subPath = "") {
   timestampedAssert(log.saved, "POST", log, mhtml)
   let formData = new FormData()
   formData.append('id', id.toString())
@@ -62,6 +62,22 @@ export async function postArticle(id: number, log?: any, mhtml?: any, webpage?: 
     body: formData
   }).then(res => {
 
+  }).catch(reason => {
+    console.log("POST Failed")
+  })
+}
+
+export function postNoContentAnswer(aid: number, uid: number) {
+  let formData = new FormData()
+  formData.append("aid", aid.toString())
+  formData.append("uid", uid.toString())
+
+  const target = "/answer/invalid"
+  fetch(endpoint + target, {
+    method: "POST",
+    body: formData
+  }).then(res => {
+    console.log("Answer Posted")
   }).catch(reason => {
     console.log("POST Failed")
   })

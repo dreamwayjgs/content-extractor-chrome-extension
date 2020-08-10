@@ -4,6 +4,7 @@ import {
   getFailedArticlesAction, postArticleAction, getArticleFileAction, getArticleCheckedAnswerAction
 } from "./controller/NaverArticle"
 import { postFileAction } from "./controller/FileHandler"
+import { postInvalidAnswerAction } from './controller/Answer'
 import { getQueryBoardAction } from './controller/queryboard'
 
 export const AppRoutes = [
@@ -46,6 +47,11 @@ export const AppRoutes = [
     path: '/article/upload',
     method: 'post',
     action: postFileAction
+  },
+  {
+    path: '/answer/invalid',
+    method: 'post',
+    action: postInvalidAnswerAction
   },
   {
     path: '/queryboard',

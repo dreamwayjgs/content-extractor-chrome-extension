@@ -18,6 +18,11 @@ const routeMethod: RouteMethod = {
 
 AppRoutes.forEach(route => routeMethod[route.method].call(router, route.path, route.action))
 
+console.log("Active Routes")
+AppRoutes.forEach(appRoute => {
+  console.log(appRoute.path, appRoute.method)
+})
+
 app.use(koaBody({ multipart: true }))
 app.use(serve('static'))
 app.use(router.routes())
