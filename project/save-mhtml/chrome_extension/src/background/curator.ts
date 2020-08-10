@@ -1,6 +1,7 @@
 import Article from "../entities/Article"
 import { getArticlesById, getArticleFile, getArticlesUrl, getArticleCheckedAnswer, postNoContentAnswer } from "./server"
 import { timestampedLog } from "../modules/debugger"
+import { timeStamp } from "console"
 
 
 class Curator {
@@ -81,6 +82,7 @@ class Curator {
     }
 
     loadPage(article: Article) {
+        timestampedLog(`Page : ${this.currentIndex}/${this.articles.length}`)
         if (article.filename && article.filename !== "file.txt") {
             timestampedLog("Open previously downloaded page")
             this.openPage(article)

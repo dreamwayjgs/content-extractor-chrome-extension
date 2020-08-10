@@ -17,7 +17,6 @@ class AnswerOverlay extends Overlay {
     infoBox: InfoBox
     position: [number, number] = [0, 0]
     size: [string, string] = ['auto', 'auto']
-    text: string = ''
     baseColor: { color: string, contrast: string }
     constructor(targetElem: HTMLElement, text: string) {
         super()
@@ -44,6 +43,7 @@ class AnswerOverlay extends Overlay {
     static drawAnswer(targetElem: HTMLElement, text: string) {
         const answerElem = new AnswerOverlay(targetElem, text)
         answerElem.draw()
+        timestampedLog("Placed", answerElem.infoBox.div.innerText)
         AnswerOverlay.sperate(answerElem.infoBox.div)
         AnswerOverlay.overlays.push(answerElem)
     }
@@ -72,6 +72,29 @@ class Coordinate {
         this.right = this.left + width
         this.bottom = this.top + height
     }
+
+    isOnLeft(target: Coordinate) {
+        return target.right < this.left
+    }
+    isOnRight(target: Coordinate) {
+        return this.right < target.left
+    }
+    isOnTop(target: Coordinate) {
+        return target.bottom < this.top
+    }
+    isOnBottom(target: Coordinate) {
+        return this.bottom < target.top
+    }
+    isOverlapped(target: Coordinate) {
+        console.log("Target on left", this.isOnLeft(target))
+        console.log("Target on right", this.isOnRight(target))
+        console.log("Target on top", this.isOnTop(target))
+        console.log("Target on bottom", this.isOnBottom(target))
+        return !(this.isOnLeft(target) ||
+            this.isOnRight(target) ||
+            this.isOnTop(target) ||
+            this.isOnBottom(target))
+    }
 }
 
 function nudgeNewBox(boxA: HTMLElement, boxB: HTMLElement): [number, number] {
@@ -79,11 +102,11 @@ function nudgeNewBox(boxA: HTMLElement, boxB: HTMLElement): [number, number] {
     const coordB = new Coordinate(boxB)
     timestampedLog("Compare", coordA, coordB)
     let { left, top } = coordB
-    if (coordA.right > coordB.left || coordA.bottom > coordB.top) {
+    if (coordA.isOverlapped(coordB)) {
+        console.log("YES! Overlapped")
         left = coordA.right + 20 // padding
     }
     return [left, top]
 }
-
 
 export default AnswerOverlay

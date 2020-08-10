@@ -36,6 +36,7 @@ function extractedAnswer() {
     console.dir(article)
     const extracted = article.content
     const hyu = $(extracted).children().first().attr('hyu')
+    console.assert(hyu, "Not Tagged. Save again")
     const answer = $(`[hyu='${hyu}']`)
     AnswerOverlay.drawAnswer(answer[0], "moz-readability")
 }
