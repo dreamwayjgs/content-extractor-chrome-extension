@@ -1,72 +1,60 @@
 import { timestampedLog } from '../../modules/debugger'
 import $ from 'jquery'
+import Border from './border'
+import InfoBox from './infobox'
+import Palette from './palette'
 
 
 abstract class Overlay {
-    abstract build(): void
     abstract draw(): void
 }
 
 class AnswerOverlay extends Overlay {
-    static boxes: AnswerOverlay[] = []
+    static overlays: AnswerOverlay[] = []
+
     targetElem: HTMLElement
-    box: HTMLElement
+    border: Border
+    infoBox: InfoBox
     position: [number, number] = [0, 0]
     size: [string, string] = ['auto', 'auto']
     text: string = ''
-    color: string
+    baseColor: { color: string, contrast: string }
     constructor(targetElem: HTMLElement, text: string) {
         super()
+        this.baseColor = Palette.getColor()
+
         this.targetElem = targetElem
         const offset = $(targetElem).offset()
         if (offset) this.position = [offset.left, offset.top];
 
-        const box = document.createElement("div")
-        const textNode = document.createTextNode(text)
-        this.color = getRandomColor()
-        box.appendChild(textNode)
-        box.style.position = "absolute"
-        box.style.background = this.color
-        box.style.color = "white"
-        box.style.zIndex = "9999"
-        box.style.paddingLeft = "10px"
-        box.style.paddingRight = "10px"
-        $(box).addClass("curation-infobox")
+        // Place infobox
+        this.infoBox = new InfoBox(text, this.baseColor)
+        this.infoBox.position = [this.position[0], this.position[1]]
 
-        this.box = box
-        $(this.box).offset({ left: this.position[0], top: this.position[1] })
-        document.body.appendChild(this.box)
-        AnswerOverlay.sperate(this.box)
-        timestampedLog("after nudge", $(this.box).offset())
-
-        AnswerOverlay.boxes.push(this)
-    }
-
-    build() {
-
+        // BORDER
+        this.border = new Border(this.baseColor.color)
+        this.border.cover(targetElem)
     }
 
     draw() {
-
+        this.infoBox.insert()
+        this.border.insert()
     }
 
     static drawAnswer(targetElem: HTMLElement, text: string) {
-
+        const answerElem = new AnswerOverlay(targetElem, text)
+        answerElem.draw()
+        AnswerOverlay.sperate(answerElem.infoBox.div)
+        AnswerOverlay.overlays.push(answerElem)
     }
 
     static sperate(aBox: HTMLElement) {
         timestampedLog("Before nudge", $(aBox).offset())
-        AnswerOverlay.boxes.forEach(existedBox => {
-            const [left, top] = nudgeNewBox(existedBox.box, aBox)
+        AnswerOverlay.overlays.forEach(existedBox => {
+            const [left, top] = nudgeNewBox(existedBox.infoBox.div, aBox)
             $(aBox).offset({ top: top, left: left })
         })
     }
-}
-
-export default AnswerOverlay
-
-class InfoBox {
-
 }
 
 class Coordinate {
@@ -97,11 +85,5 @@ function nudgeNewBox(boxA: HTMLElement, boxB: HTMLElement): [number, number] {
     return [left, top]
 }
 
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
+
+export default AnswerOverlay
