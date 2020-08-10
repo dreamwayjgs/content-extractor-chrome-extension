@@ -1142,6 +1142,11 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
+"@mozilla/readability@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@mozilla/readability/-/readability-0.3.0.tgz#a473790e8b42ea39f9f03703fa1f17fec7984b60"
+  integrity sha512-q8f1CAZsRKK1j+O0BmikGIlKSK03RpT4woT0PCQwhw0nH0z4+rG026AkxoPcjT7Dsgh1ifGscW8tOpvjoyOjvw==
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"
@@ -1315,10 +1320,20 @@
   dependencies:
     "@types/sizzle" "*"
 
+"@types/mozilla-readability@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@types/mozilla-readability/-/mozilla-readability-0.2.0.tgz#84ba2b7466e45d1d7f5585b429d20c56945ae185"
+  integrity sha512-9NZhF6jASTsphU944xxcbXLesml1DQ/I+72MNTmPqxW/yF+JRS4KW+pUHA64aSUJQVCyyxmhHKV0MJWjqXGRaQ==
+
 "@types/node@*":
   version "14.0.24"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.24.tgz#b0f86f58564fa02a28b68f8b55d4cdec42e3b9d6"
   integrity sha512-btt/oNOiDWcSuI721MdL8VQGnjsKjlTMdrKyTcLCKeQp/n4AAMFJ961wMbp+09y8WuGPClDEv07RIItdXKIXAA==
+
+"@types/node@^14.0.27":
+  version "14.0.27"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.27.tgz#a151873af5a5e851b51b3b065c9e63390a9e0eb1"
+  integrity sha512-kVrqXhbclHNHGu9ztnAwSncIgJv/FaxmzXJvGXNdcCpV1b8u1/Mi6z6m0vwy0LzKeXFTPLH0NzwmoJ3fNCIq0g==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"

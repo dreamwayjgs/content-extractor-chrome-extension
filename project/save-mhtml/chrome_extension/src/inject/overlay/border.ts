@@ -17,6 +17,11 @@ class Border {
         this.top.style.position = "absolute"
         this.bottom.style.position = "absolute"
 
+        this.left.style.zIndex = "9999"
+        this.right.style.zIndex = "9999"
+        this.top.style.zIndex = "9999"
+        this.bottom.style.zIndex = "9999"
+
         this.color = color
         this.thickness = thickness
     }

@@ -1,7 +1,7 @@
 import { timestampedLog } from '../modules/debugger'
 import AnswerOverlay from './overlay/answer'
-// import Readability from "./readability"
-const Readability = require("./readability")
+import { Readability } from "@mozilla/readability"
+import $ from 'jquery'
 
 
 export function curation(answerData: any[]) {
@@ -33,5 +33,9 @@ function curationAnswer(answerData: any[]) {
 function extractedAnswer() {
     const documentClone = document.cloneNode(true)
     const article = new Readability(documentClone).parse()
-    console.log(article)
+    console.dir(article)
+    const extracted = article.content
+    const hyu = $(extracted).children().first().attr('hyu')
+    const answer = $(`[hyu='${hyu}']`)
+    AnswerOverlay.drawAnswer(answer[0], "moz-readability")
 }

@@ -15,7 +15,9 @@
     "test": "jest"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.3.0",
     "@types/chrome": "^0.0.117",
+    "@types/mozilla-readability": "^0.2.0",
     "@types/node": "^14.0.23",
     "chrome-extension-async": "^3.4.1"
   },
