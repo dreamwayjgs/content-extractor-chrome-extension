@@ -59,7 +59,7 @@ export async function getFailedArticlesAction(ctx: Context) {
   console.log("Restart with failed pages")
   try {
     await client.connect()
-    let sql = "SELECT id, url_origin FROM target_page where saved = false"
+    let sql = "SELECT id, url_origin FROM target_page where center_values is null order by id"
     if (from !== -1) {
       sql += " LIMIT $2 OFFSET $1"
       const values = [from, size]
@@ -146,12 +146,46 @@ export async function postArticleAction(ctx: Context) {
       })
       sql += ", mhtml = $3"
       values.push(ctx.request.files.mhtml)
+
+      const webpage = JSON.parse(body.webpage)
+      sql += ", webpage = $4"
+      values.push(webpage)
+
+      sql += "WHERE id = $5"
+      values.push(body.id)
     }
-    const webpage = JSON.parse(body.webpage)
-    sql += ", webpage = $4"
-    values.push(webpage)
-    sql += "WHERE id = $5"
-    values.push(body.id)
+    else {
+      sql += "WHERE id = $3"
+      values.push(body.id)
+    }
+
+    const res = await client.query(sql, values)
+    console.assert(res.rowCount === 1, "UPDATE FAILED")
+    await client.query("COMMIT")
+    ctx.body = "Received"
+  }
+  catch (err) {
+    await client.query("ROLLBACK")
+    errorMsg(ctx, err, "Query Failed")
+    if (err instanceof SyntaxError) {
+      console.log(body)
+    }
+  }
+  client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
+}
+
+export async function postCenterValues(ctx: Context) {
+  const body = ctx.request.body
+  const client = getPgClient()
+  try {
+    await client.connect()
+    const id = body.id
+    const data = body.data
+
+    console.log(id, data)
+
+    const sql = "UPDATE target_page SET center_values = $2 WHERE id = $1"
+    const values = [id, data]
     const res = await client.query(sql, values)
     console.assert(res.rowCount === 1, "UPDATE FAILED")
     await client.query("COMMIT")
@@ -163,6 +197,7 @@ export async function postArticleAction(ctx: Context) {
   }
   client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
 }
+
 
 function getMhtmlFilePath(id: string | number) {
   return `./static/mhtml/${id}.mhtml`

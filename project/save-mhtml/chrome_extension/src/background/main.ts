@@ -1,8 +1,9 @@
 import { timestampedLog } from '../modules/debugger'
-import { establish, postArticle } from './server'
+import { establish, postArticle, postCenterValues } from './server'
 import Crawler from './crawler'
 import 'chrome-extension-async'
 import Curator from './curator'
+import Extractor from './extractor'
 
 function main() {
   console.log("hello backround")
@@ -22,17 +23,15 @@ function main() {
         break
       case /^capture/.test(command):
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-          chrome.pageCapture.saveAsMHTML({ tabId: tabs[0].id! }, mhtml => {
-            timestampedLog("Saved ", mhtml)
-            postArticle(6852448, { status: "Manual", saved: true }, mhtml, "/upload")
-          })
+          console.assert(tabs[0].id !== undefined)
+          console.log("crawl in current tab")
+          crawler.crawlOne(tabs[0].id!)
         });
         break
       case /^curation$/.test(command):
         timestampedLog("Curation requested")
-        const curator = await Curator.createCuratorWithSelectedIds([4613259,
-        ])
-        // const curator = await Curator.createCuratorWithAllIds()
+        const curator = await Curator.createCuratorWithSelectedIds([5599933, 5015930], request.option.auto)
+        // const curator = await Curator.createCuratorWithAllIds(request.option.auto, { failed: false })
         chrome.tabs.create({ active: true }, tab => {
           console.assert(tab.id !== undefined)
           console.log("New tab updated")
@@ -49,6 +48,10 @@ function main() {
       case /^extraction/.test(command):
         const extractor: string = request.extractor!
         timestampedLog("Extraction requested")
+        Extractor.runOnce()
+        break
+      case /^request-center-statistics/.test(command):
+        postCenterValues(request.aid, request.data)
         break
       default:
         timestampedLog("Unknown Command: ", request)
@@ -58,11 +61,11 @@ function main() {
 
 function singleTest(isTest = false) {
   if (isTest) {
-    const ids = [5635939]
+    const ids = [3453021, 3870781, 3636199]
     // const ids = ["4344906"]
     return Crawler.pickPagesWithId(ids)
   }
-  else return Crawler.gatherPagesWithStatus("all");
+  else return Crawler.gatherPagesWithStatus("failed");
 }
 
 main()

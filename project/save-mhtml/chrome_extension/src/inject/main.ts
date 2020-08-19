@@ -1,6 +1,7 @@
 import { timestampedLog } from '../modules/debugger'
-import Preprocessor from './preprocessor';
+import Preprocessor from './preprocessor'
 import { curation } from './curation-view'
+import { extractedAnswers } from './extractor-view'
 
 timestampedLog("Script injected at the beginning! Wait window full loading")
 
@@ -16,6 +17,9 @@ function main() {
     switch (command) {
       case "curation":
         curation(request.answerData)
+        break
+      case "extract":
+        extractedAnswers()
         break
     }
   })

@@ -49,7 +49,7 @@ export async function getArticleCheckedAnswer(aid: number) {
 }
 
 export function postArticle(id: number, log?: any, mhtml?: any, webpage?: any, subPath = "") {
-  timestampedAssert(log.saved, "POST", log, mhtml)
+  timestampedAssert(log.saved, "POST", id, log, mhtml)
   let formData = new FormData()
   formData.append('id', id.toString())
   formData.append('log', JSON.stringify(log))
@@ -57,6 +57,23 @@ export function postArticle(id: number, log?: any, mhtml?: any, webpage?: any, s
   if (webpage) formData.append('webpage', JSON.stringify(webpage));
 
   const target = "/article" + subPath
+  fetch(endpoint + target, {
+    method: "POST",
+    body: formData
+  }).then(res => {
+
+  }).catch(reason => {
+    console.log("POST Failed")
+  })
+}
+
+export function postCenterValues(id: number, data: any) {
+  timestampedLog("SEND plz", id, data)
+  let formData = new FormData()
+  formData.append('id', id.toString())
+  formData.append('data', JSON.stringify(data))
+
+  const target = "/article/center/values"
   fetch(endpoint + target, {
     method: "POST",
     body: formData

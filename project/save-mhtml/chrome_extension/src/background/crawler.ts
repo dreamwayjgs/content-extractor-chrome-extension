@@ -5,7 +5,7 @@ import Article, { ArticlePath } from '../entities/Article'
 type PageStatus = "all" | "failed" | "success"
 type CrawlStatus = "idle" | "running" | "done"
 
-const MAX_PAGE_LOAD_TIMEOUT = 20000
+const MAX_PAGE_LOAD_TIMEOUT = 25000
 const MAX_PREPROCESS_TIMEOUT = 5000
 
 class Crawler {
@@ -27,7 +27,7 @@ class Crawler {
     let filter: ArticlePath = ""
     if (status === "failed") filter = "/failed";
     const articles = await getArticlesUrl(filter, from, size)
-    timestampedLog(articles)
+    timestampedLog(articles.map(article => article.id))
     return new Crawler(articles)
   }
 
@@ -44,6 +44,13 @@ class Crawler {
     chrome.webNavigation.onCompleted.addListener(this.onLoadAction)
     chrome.webNavigation.onCommitted.addListener(this.onCommittedAction)
     this.loadPage()
+  }
+
+  crawlOne(tabId: number) {
+    timestampedLog("CrawlOne starts...")
+    this.tabId = tabId
+
+    // TODO: Search any current page in database or insert new one
   }
 
   saveOnTimeoutForDelayedPage(details: chrome.webNavigation.WebNavigationFramedCallbackDetails) {
@@ -79,6 +86,7 @@ class Crawler {
     const tabId = details.tabId
     const articleId = this.articles[this.currentIndex].id
     const normallyLoaded = !forced
+    timestampedLog("[BG -> CS] REQUEST Preprocessing")
     chrome.tabs.sendMessage(tabId, { command: "crawl" }, async res => {
       const lastError = chrome.runtime.lastError
       if (lastError) {

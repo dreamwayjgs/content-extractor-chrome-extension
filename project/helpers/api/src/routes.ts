@@ -1,7 +1,7 @@
 import { greet } from "./controller/hello"
 import {
   getArticleAction, getArticlesAction,
-  getFailedArticlesAction, postArticleAction, getArticleFileAction, getArticleCheckedAnswerAction
+  getFailedArticlesAction, postArticleAction, getArticleFileAction, getArticleCheckedAnswerAction, postCenterValues
 } from "./controller/NaverArticle"
 import { postFileAction } from "./controller/FileHandler"
 import { postInvalidAnswerAction } from './controller/Answer'
@@ -47,6 +47,11 @@ export const AppRoutes = [
     path: '/article/upload',
     method: 'post',
     action: postFileAction
+  },
+  {
+    path: '/article/center/values',
+    method: 'post',
+    action: postCenterValues
   },
   {
     path: '/answer/invalid',
