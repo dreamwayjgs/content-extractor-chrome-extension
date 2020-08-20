@@ -16,12 +16,20 @@ class Boundary {
     const offset = $(box).offset()
     const width = $(box).width() ?? 0
     const height = $(box).height() ?? 0
+    const { left, top, right, bottom } = box.getBoundingClientRect()
 
     this.left = offset?.left ?? 0
     this.top = offset?.top ?? 0
     this.right = this.left + width
     this.bottom = this.top + height
     this.center = [(this.left + this.right) / 2, (this.top + this.bottom) / 2]
+    console.log(box.getBoundingClientRect())
+    console.log(this.left, this.top, this.right, this.bottom)
+  }
+
+  closestLineTo(aCoord: Coordinates) {
+    const sorted = this.nearVertexesFrom(aCoord)
+    return [sorted[0], sorted[1]]
   }
 
   distance(coord: Coordinates): number {
@@ -29,25 +37,44 @@ class Boundary {
     if (!this.isEnclosed(coord)) {
       toCenter = this.distanceFromCenterOf(coord)
     }
-    const dist = toCenter + this.distanceSumVertexToCoord(coord) / 4
+    const nearness = this.distanceVertexTo(coord, "heron")
+    timestampedLog("heron calc", nearness)
+    const dist = toCenter + nearness
     return dist
   }
 
-  distanceSumVertexToCoord(aCoord: Coordinates): number {
+  nearVertexesFrom(aCoord: Coordinates) {
     const lt: Coordinates = [this.left, this.top]
     const rt: Coordinates = [this.right, this.top]
     const lb: Coordinates = [this.left, this.bottom]
     const rb: Coordinates = [this.right, this.bottom]
 
-    // const sum = [lt, rt, lb, rb].reduce<number>((acc, cur) => {
-    //   const dist = distanceBetweenCoords(aCoord, cur)
-    //   return acc + dist
-    // }, 0)
     const sorted = [lt, rt, lb, rb].map(vertex => {
-      return distanceBetweenCoords(vertex, aCoord)
-    }).sort()
-    const sum = sorted[0] + sorted[3]
-    return sum
+      return {
+        vertex: vertex,
+        dist: distanceBetweenCoords(vertex, aCoord)
+      }
+    }).sort((a, b) => a.dist - b.dist)
+    timestampedLog("SORTED", sorted)
+    return sorted
+  }
+
+  distanceVertexTo(aCoord: Coordinates, option = "sum"): number {
+    const sorted = this.nearVertexesFrom(aCoord)
+    switch (option) {
+      case "min":
+        return sorted[0].dist
+      case "sum":
+        return sorted.reduce<number>((acc, cur) => acc + cur.dist, 0)
+      case "heron": // from "Heron's formula"
+        const a = sorted[0].dist
+        const b = sorted[1].dist
+        const c = distanceBetweenCoords(sorted[0].vertex, sorted[1].vertex)
+        return heronsFormular(a, b, c)
+      case "sum-of-min-max":
+      default:
+        return sorted[0].dist + sorted[3].dist
+    }
   }
 
   distanceSumFromVertexOf(aTarget: HTMLElement): number {
@@ -112,7 +139,22 @@ class Boundary {
   }
 }
 
+function heronsFormular(a: number, b: number, c: number): number {
+  // https://en.wikipedia.org/wiki/Heron%27s_formula
+  const a2 = Math.pow(a, 2)
+  const b2 = Math.pow(b, 2)
+  const c2 = Math.pow(c, 2)
+  const first = -a2 + b2 + c2
+  const second = first / (2 * c)
+  const third = Math.pow(second, 2)
+  const fourth = b2 - third
+  const result = Math.sqrt(fourth)
+  return result
+}
+
 function distanceBetweenCoords(A: Coordinates, B: Coordinates) {
+  if (A[0] === B[0]) return Math.abs(A[1] - B[1]);
+  if (A[1] === B[1]) return Math.abs(A[0] - B[0]);
   const disX = A[0] - B[0]
   const disY = A[1] - B[1]
   return Math.sqrt(Math.abs(disX * disX) + Math.abs(disY * disY));

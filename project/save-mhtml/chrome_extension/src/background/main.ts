@@ -8,7 +8,7 @@ import Extractor from './extractor'
 function main() {
   console.log("hello backround")
   establish()
-  // const crawler = await Crawler.pickPagesWithId(ids)
+
   chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     const command = request.command
     switch (true) {
@@ -30,8 +30,8 @@ function main() {
         break
       case /^curation$/.test(command):
         timestampedLog("Curation requested")
-        const curator = await Curator.createCuratorWithSelectedIds([5599933, 5015930], request.option.auto)
-        // const curator = await Curator.createCuratorWithAllIds(request.option.auto, { failed: false })
+        // const curator = await Curator.createCuratorWithSelectedIds([5599933, 5015930], request.option.auto)
+        const curator = await Curator.createCuratorWithAllIds(request.option.auto, { failed: false })
         chrome.tabs.create({ active: true }, tab => {
           console.assert(tab.id !== undefined)
           console.log("New tab updated")
@@ -54,6 +54,7 @@ function main() {
         postCenterValues(request.aid, request.data)
         break
       default:
+        testSession(true)
         timestampedLog("Unknown Command: ", request)
     }
   });
@@ -66,6 +67,21 @@ function singleTest(isTest = false) {
     return Crawler.pickPagesWithId(ids)
   }
   else return Crawler.gatherPagesWithStatus("failed");
+}
+
+function testSession(debug = false) {
+  if (!debug) return;
+  timestampedLog("Run TEST...")
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    const tab = tabs[0]
+    if (tab.id) {
+      timestampedLog("Run TEST in tab ", tab.id)
+      chrome.tabs.sendMessage(tab.id, {
+        command: "test"
+      })
+    }
+    else console.log("No TAB TO TEST")
+  })
 }
 
 main()

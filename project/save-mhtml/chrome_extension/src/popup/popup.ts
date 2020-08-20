@@ -1,6 +1,7 @@
 import { crawlAllAction, crawlOnceAction } from './crawl-action'
 import { curationAction, optionPanel } from './curation-action'
 import { extractAction } from './extract-action'
+import { testAction } from './test-action'
 
 optionPanel(document.getElementById("curation-card")!)
 
@@ -15,4 +16,7 @@ window.onload = () => {
 
   const extractButton: HTMLElement = document.getElementById("extractor-card")!
   extractAction(extractButton)
+
+  const testCard: HTMLElement = document.getElementById("test-card")!
+  testAction(testCard)
 }

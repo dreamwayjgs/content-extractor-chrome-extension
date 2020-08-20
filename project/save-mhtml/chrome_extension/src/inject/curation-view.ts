@@ -1,7 +1,7 @@
 import { timestampedLog } from '../modules/debugger'
 import AnswerOverlay from './overlay/answer'
 import Boundary from './overlay/boundary'
-import CenterFenceExtractor from './extractors/center-fence'
+import CenterFenceExtractor, { createMarker } from './extractors/center-fence'
 import { extractedAnswers } from './extractor-view'
 
 
@@ -46,7 +46,7 @@ function examineAnswer(answer: any) {
   const coordinates = centerFence.examineCenters()
   const overlaps: Boolean[] = []
   for (let coord of coordinates) {
-    const boundary = new Boundary(centerFence.createMarker(coord))
+    const boundary = new Boundary(createMarker(coord))
     overlaps.push(mainContentBoundary.isOverlapped(boundary))
   }
   timestampedLog("COORDS", coordinates)

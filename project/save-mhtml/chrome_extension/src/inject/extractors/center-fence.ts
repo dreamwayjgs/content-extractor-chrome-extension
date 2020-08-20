@@ -37,15 +37,10 @@ class CenterFenceExtractor implements Extractor {
 
       const parents = this.parentDivs(item.elem)
       AnswerOverlay.drawAnswer(parents[0], `Distance From ${index}: ${item.dist[index].toString()}`)
-      console.log("original item: ", index, item)
-      console.log("parents: ", index, parents)
       parents.forEach((elem, index) => {
         timestampedLog("parent ", index, elem)
         const numOfAnchors = $("a", elem).length
         const text = $(elem).text()
-        // console.log("parnets tag length STATS", text.length, numOfAnchors)
-        // console.log("TEXT NO NEWLINE", text.replace(/\r?\n|\r/g, ''))
-        // console.log("TEXT NO WHITESPACES", text.replace(/\s/g, '').length)
       })
     })
 
@@ -67,7 +62,7 @@ class CenterFenceExtractor implements Extractor {
   closestElementsFromCenters() {
     const centers = this.examineCenters(5)
     centers.forEach((center, index) => {
-      AnswerOverlay.drawAnswer(this.createMarker(center, "red", index.toString()), index.toString())
+      AnswerOverlay.drawAnswer(createMarker(center, "red", index.toString()), index.toString())
     })
 
     const elems = Array.from($("body :not([class|='hyu'])").filter(":visible"))
@@ -148,20 +143,21 @@ class CenterFenceExtractor implements Extractor {
     return [left, top]
   }
 
-  createMarker(coordinates: Coordinates, color = "red", text = "marker"): HTMLElement {
-    const marker = document.createElement("div")
-    const textNode = document.createTextNode(text)
-    marker.appendChild(textNode)
-    marker.style.position = "absolute"
-    $(marker).offset({ left: coordinates[0], top: coordinates[1] })
-    $(marker).addClass("hyu-marker")
-    document.body.appendChild(marker)
+}
 
-    const border = new Border(color, "5px")
-    border.cover(marker)
-    border.insert()
-    return marker
-  }
+export function createMarker(coordinates: Coordinates, color = "red", text = "marker"): HTMLElement {
+  const marker = document.createElement("div")
+  const textNode = document.createTextNode(text)
+  marker.appendChild(textNode)
+  marker.style.position = "absolute"
+  $(marker).offset({ left: coordinates[0], top: coordinates[1] })
+  $(marker).addClass("hyu-marker")
+  document.body.appendChild(marker)
+
+  const border = new Border(color, "5px")
+  border.cover(marker)
+  border.insert()
+  return marker
 }
 
 export default CenterFenceExtractor
