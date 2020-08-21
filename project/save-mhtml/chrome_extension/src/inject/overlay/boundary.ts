@@ -7,24 +7,28 @@ type Left = number
 export type Coordinates = [Left, Top]
 
 class Boundary {
+  rect: DOMRect
   left: number
   right: number
   top: number
   bottom: number
+  width: number
+  height: number
   center: Coordinates
   constructor(box: HTMLElement) {
-    const offset = $(box).offset()
-    const width = $(box).width() ?? 0
-    const height = $(box).height() ?? 0
-    const { left, top, right, bottom } = box.getBoundingClientRect()
+    this.rect = box.getBoundingClientRect()
+    const { left, top, right, bottom, width, height } = this.rect
 
-    this.left = offset?.left ?? 0
-    this.top = offset?.top ?? 0
-    this.right = this.left + width
-    this.bottom = this.top + height
+    this.left = left
+    this.top = top
+    this.right = right
+    this.bottom = bottom
+    this.width = width
+    this.height = height
+    if (width * height === 0) {
+      throw new ZeroAreaElementException("This Element has no area")
+    }
     this.center = [(this.left + this.right) / 2, (this.top + this.bottom) / 2]
-    console.log(box.getBoundingClientRect())
-    console.log(this.left, this.top, this.right, this.bottom)
   }
 
   closestLineTo(aCoord: Coordinates) {
@@ -38,8 +42,8 @@ class Boundary {
       toCenter = this.distanceFromCenterOf(coord)
     }
     const nearness = this.distanceVertexTo(coord, "heron")
-    timestampedLog("heron calc", nearness)
     const dist = toCenter + nearness
+    console.assert(!isNaN(dist), "WHAT?", toCenter, nearness)
     return dist
   }
 
@@ -55,7 +59,11 @@ class Boundary {
         dist: distanceBetweenCoords(vertex, aCoord)
       }
     }).sort((a, b) => a.dist - b.dist)
-    timestampedLog("SORTED", sorted)
+    if (this.width === 0 || this.height === 0) { // vertical / horizontal line
+      console.log("I'm BOX", this)
+      console.log("Line", [sorted[0], sorted[2], sorted[2], sorted[2]])
+      return [sorted[0], sorted[2], sorted[2], sorted[2]]
+    }
     return sorted
   }
 
@@ -141,6 +149,7 @@ class Boundary {
 
 function heronsFormular(a: number, b: number, c: number): number {
   // https://en.wikipedia.org/wiki/Heron%27s_formula
+
   const a2 = Math.pow(a, 2)
   const b2 = Math.pow(b, 2)
   const c2 = Math.pow(c, 2)
@@ -149,6 +158,7 @@ function heronsFormular(a: number, b: number, c: number): number {
   const third = Math.pow(second, 2)
   const fourth = b2 - third
   const result = Math.sqrt(fourth)
+  console.assert(a * b * c, "HERON ABC", a, b, c, first, second, third, fourth, result)
   return result
 }
 
@@ -158,6 +168,13 @@ function distanceBetweenCoords(A: Coordinates, B: Coordinates) {
   const disX = A[0] - B[0]
   const disY = A[1] - B[1]
   return Math.sqrt(Math.abs(disX * disX) + Math.abs(disY * disY));
+}
+
+export class ZeroAreaElementException extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = "ZeroAreaElementException"
+  }
 }
 
 export default Boundary

@@ -174,7 +174,7 @@ export async function postArticleAction(ctx: Context) {
   client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
 }
 
-export async function postCenterValues(ctx: Context) {
+export async function postCenterValuesAction(ctx: Context) {
   const body = ctx.request.body
   const client = getPgClient()
   try {
@@ -198,8 +198,31 @@ export async function postCenterValues(ctx: Context) {
   client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
 }
 
+export async function postExtractorResultAction(ctx: Context) {
+  const body = ctx.request.body
+  const client = getPgClient()
+  try {
+    await client.connect()
+    const id = body.id
+    const data = body.result
+
+    console.log(id)
+
+    const sql = "UPDATE target_page SET extractor_report = $2 WHERE id = $1"
+    const values = [id, data]
+    const res = await client.query(sql, values)
+    console.assert(res.rowCount === 1, "UPDATE FAILED")
+    await client.query("COMMIT")
+    ctx.body = "Received"
+  }
+  catch (err) {
+    await client.query("ROLLBACK")
+    errorMsg(ctx, err, "Query Failed")
+  }
+  client.end().catch(err => { errorMsg(ctx, err, "Error during client disconnection") })
+}
+
 
 function getMhtmlFilePath(id: string | number) {
   return `./static/mhtml/${id}.mhtml`
-
 }

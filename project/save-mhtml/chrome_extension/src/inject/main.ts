@@ -19,10 +19,12 @@ function main() {
         sendResponse(response)
         break
       case "curation":
-        curation(request.answerData)
+        const extractedInCuration = curation(request.answerData)
+        if (extractedInCuration) sendResponse(extractedInCuration)
         break
       case "extract":
-        extractedAnswers()
+        const extracted = extractedAnswers()
+        sendResponse(extracted)
         break
       case "test":
         console.log("runTEST")

@@ -3,12 +3,13 @@ import AnswerOverlay from './overlay/answer'
 import Boundary from './overlay/boundary'
 import CenterFenceExtractor, { createMarker } from './extractors/center-fence'
 import { extractedAnswers } from './extractor-view'
+import { ExtractorResult } from './extractors/extractor'
 
 
-export function curation(answerData: any[]) {
+export function curation(answerData: any[]): ExtractorResult[] | null {
   timestampedLog("Running in ", parent.frames.length)
   curationAnswer(answerData)
-  extractedAnswers()
+  return extractedAnswers()
   // examineAnswer(answerData[0]) // TODO: What answer would be chosen?
 }
 

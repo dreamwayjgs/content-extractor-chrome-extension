@@ -6,6 +6,8 @@ class Extractor {
       if (tab.id) {
         chrome.tabs.sendMessage(tab.id, {
           command: "extract"
+        }, (response) => {
+          console.log(response)
         })
       }
       else console.log("No TAB TO extract")

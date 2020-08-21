@@ -1,6 +1,7 @@
 import Boundary, { Coordinates } from './boundary'
 import Border from './border'
 import { createMarker } from '../extractors/center-fence'
+import { timestampedLog } from '../../modules/debugger'
 
 
 class TestBoundary {
@@ -13,9 +14,8 @@ class TestBoundary {
     boxElem.style.height = "100px"
     boxElem.style.top = "100px"
     boxElem.style.left = "100px"
-    boxElem.style.outline = "solid 1px #666"
-    document.body.appendChild(boxElem)
     this.boxElem = boxElem
+    document.body.appendChild(boxElem)
 
     const canvas = document.createElement("canvas")
     canvas.width = window.outerWidth
@@ -23,6 +23,13 @@ class TestBoundary {
     canvas.style.margin = "0"
     canvas.style.padding = "0"
     document.body.appendChild(canvas)
+    const ctx = canvas.getContext("2d")!
+    ctx.beginPath()
+    const { left, top, width, height } = boxElem.getBoundingClientRect()
+    timestampedLog("DRAWING", left, top, width, height)
+    ctx.strokeStyle = "#AAA";
+    ctx.rect(left, top, width, height)
+    ctx.stroke()
     this.canvas = canvas
   }
 

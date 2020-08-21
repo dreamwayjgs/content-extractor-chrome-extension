@@ -15,6 +15,7 @@
     "typescript": "^3.9.6"
   },
   "scripts": {
-    "start": "tsc && node dist/app.js"
+    "start": "tsc && node dist/app.js",
+    "watch": "tsc --watch"
   }
 }

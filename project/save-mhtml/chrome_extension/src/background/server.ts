@@ -1,5 +1,6 @@
 import { timestampedLog, timestampedAssert } from '../modules/debugger'
 import Article, { ArticleType, ArticlePath, AnsweredArticle } from '../entities/Article'
+import { ExtractorResult } from '../inject/extractors/extractor'
 
 
 const endpoint = "http://127.0.0.1:53000"
@@ -80,7 +81,7 @@ export function postCenterValues(id: number, data: any) {
   }).then(res => {
 
   }).catch(reason => {
-    console.log("POST Failed")
+    console.log("POST Failed", reason)
   })
 }
 
@@ -94,8 +95,25 @@ export function postNoContentAnswer(aid: number, uid: number) {
     method: "POST",
     body: formData
   }).then(res => {
-    console.log("Answer Posted")
+    console.log("Answer Posted", res)
   }).catch(reason => {
-    console.log("POST Failed")
+    console.log("POST Failed", reason)
+  })
+}
+
+export function postExtractorReport(id: number, result: ExtractorResult[]) {
+  timestampedLog("SEND EXTRACTOR RESULT", result)
+  let formData = new FormData()
+  formData.append('id', id.toString())
+  formData.append('result', JSON.stringify(result))
+
+  const target = "/article/extractor/report"
+  fetch(endpoint + target, {
+    method: "POST",
+    body: formData
+  }).then(res => {
+    console.log("Extractor Report Posted", res)
+  }).catch(reason => {
+    console.log("POST Failed", reason)
   })
 }

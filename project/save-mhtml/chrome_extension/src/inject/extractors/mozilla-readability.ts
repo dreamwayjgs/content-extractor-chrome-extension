@@ -15,8 +15,10 @@ class MozReadabilityExtractor implements Extractor {
     console.assert(hyu, "Not Tagged. Save again")
     const answer = $(`[hyu='${hyu}']`)
     return {
+      extractorName: this.name,
       title: article.title,
-      result: answer[0]
+      result: answer[0],
+      raw: article
     }
   }
 }

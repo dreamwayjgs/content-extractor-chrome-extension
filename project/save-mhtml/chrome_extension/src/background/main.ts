@@ -54,7 +54,7 @@ function main() {
         postCenterValues(request.aid, request.data)
         break
       default:
-        testSession(true)
+        // testSession(true)
         timestampedLog("Unknown Command: ", request)
     }
   });

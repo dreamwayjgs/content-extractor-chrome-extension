@@ -1,6 +1,5 @@
 import { analyzeExtractionLog, getDateFallback } from './recent-log'
 import { writeFileSync } from 'fs'
-import { fail } from 'assert'
 
 async function main() {
   console.log("START Script")

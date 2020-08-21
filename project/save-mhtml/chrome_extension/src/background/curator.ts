@@ -1,6 +1,7 @@
 import Article, { ArticlePath } from "../entities/Article"
-import { getArticlesById, getArticleFile, getArticlesUrl, getArticleCheckedAnswer, postNoContentAnswer } from "./server"
+import { getArticlesById, getArticleFile, getArticlesUrl, getArticleCheckedAnswer, postNoContentAnswer, postExtractorReport } from "./server"
 import { timestampedLog } from "../modules/debugger"
+import { ExtractorResult } from "../inject/extractors/extractor"
 
 
 class Curator {
@@ -155,10 +156,15 @@ class Curator {
   }
 
   sendAnswerDataToContentScript(answerData: any) {
-    chrome.tabs.sendMessage(this.tabId, { command: "curation", answerData: answerData, articleId: this.articles[this.currentIndex].id }, () => {
+    chrome.tabs.sendMessage(this.tabId, { command: "curation", answerData: answerData, articleId: this.articles[this.currentIndex].id }, (response: ExtractorResult[]) => {
       const lastError = chrome.runtime.lastError
+      const id = this.articles[this.currentIndex].id
       if (lastError)
-        timestampedLog("In content", lastError)
+        timestampedLog("In content", lastError);
+      timestampedLog("From Content Response. Sending...")
+      console.assert(response.length > 1, "Response is not an array", response)
+      postExtractorReport(id, response)
+
     })
   }
 

@@ -1,7 +1,7 @@
 import Extractor from "./extractor";
 import $ from 'jquery'
 import AnswerOverlay from "../overlay/answer";
-import Boundary, { Coordinates } from '../overlay/boundary'
+import Boundary, { Coordinates, ZeroAreaElementException } from '../overlay/boundary'
 import Border from "../overlay/border";
 import { timestampedLog } from "../../modules/debugger";
 
@@ -31,27 +31,52 @@ class CenterFenceExtractor implements Extractor {
     timestampedLog("Starting Extracts")
     let result = $("body")[0]
 
-    const possibles = this.closestElementsFromCenters()
+    const [possibles, centers] = this.closestElementsFromCenters()
+    let data = {
+      centerCoords: centers,
+      reportOfCenters: new Array<any>()
+    }
     possibles.forEach((item, index) => {
+      timestampedLog("================Center " + index + " ============")
       AnswerOverlay.drawAnswer(item.elem, `Closest from ${index}`)
 
       const parents = this.parentDivs(item.elem)
       AnswerOverlay.drawAnswer(parents[0], `Distance From ${index}: ${item.dist[index].toString()}`)
+      const reportEachCenter = {
+        center: item,
+        elements: new Array<any>()
+      }
       parents.forEach((elem, index) => {
         timestampedLog("parent ", index, elem)
         const numOfAnchors = $("a", elem).length
         const text = $(elem).text()
+        const singleWhiteSpaced = text.replace(/\s\s+/g, ' ')
+        timestampedLog("ANCHOR", numOfAnchors)
+        timestampedLog("TEXT", text.length, singleWhiteSpaced.length)
+        timestampedLog("RATIO", singleWhiteSpaced.length / (1 + numOfAnchors))
+        const report = {
+          element: elem,
+          numOfAnchors: numOfAnchors,
+          originalTextLength: text.length,
+          reducedTextLength: singleWhiteSpaced.length,
+          linkRatio: singleWhiteSpaced.length / (1 + numOfAnchors)
+        }
+        reportEachCenter.elements.push(report)
       })
+      data.reportOfCenters.push(reportEachCenter)
     })
 
+    console.log("THIS IS RESULT", data)
+
     return {
+      extractorName: this.name,
       title: "Not Found",
-      result: result
+      result: result,
+      raw: data
     }
   }
 
   parentDivs(elem: HTMLElement) {
-    console.log("Am I DIV? ", elem.tagName, DIV_LIKE_TAGS.includes(elem.tagName.toLowerCase()))
     let result: HTMLElement[] = []
     if (DIV_LIKE_TAGS.includes(elem.tagName.toLowerCase()))
       result.push(elem);
@@ -59,26 +84,30 @@ class CenterFenceExtractor implements Extractor {
     return result.concat(parents)
   }
 
-  closestElementsFromCenters() {
-    const centers = this.examineCenters(5)
+  closestElementsFromCenters(): [ElementWithDistances[], Coordinates[]] {
+    const centers = this.examineCenters(5) // 하드코딩
     centers.forEach((center, index) => {
       AnswerOverlay.drawAnswer(createMarker(center, "red", index.toString()), index.toString())
     })
 
-    const elems = Array.from($("body :not([class|='hyu'])").filter(":visible"))
-    const elemsWithDistancesFromCenters: ElementWithDistances[] = elems.map(elem => {
-      const boundary = new Boundary(<HTMLElement>elem)
-      const distanceFromEachCenters = centers.map(center => boundary.distance(center))
-      if (elem.className === "target") {
-        console.log("SEE", elem, boundary, distanceFromEachCenters)
+    const elems = Array.from($(":not([class|='hyu'])").filter(":visible"))
+    const elemsWithDistancesFromCenters = elems.map(elem => {
+      try {
+        const boundary = new Boundary(<HTMLElement>elem)
+        const distanceFromEachCenters = centers.map(center => boundary.distance(center))
+        return {
+          elem: <HTMLElement>elem,
+          dist: distanceFromEachCenters
+        }
       }
-      return {
-        elem: <HTMLElement>elem,
-        dist: distanceFromEachCenters
+      catch (err) {
+        return null
       }
     })
-    let closestItems: ElementWithDistances[] = Array(centers.length).fill(elemsWithDistancesFromCenters[0])
-    elemsWithDistancesFromCenters.forEach(item => {
+    const removedLineOrPoint: ElementWithDistances[] = elemsWithDistancesFromCenters.filter((el): el is ElementWithDistances => el !== null)
+    console.log("LEN", elemsWithDistancesFromCenters.length, removedLineOrPoint.length)
+    let closestItems: ElementWithDistances[] = Array(centers.length).fill(removedLineOrPoint[0])
+    removedLineOrPoint.forEach(item => {
       for (let i = 0; i < item.dist.length; i++) {
         if (item.dist[i] < closestItems[i].dist[i]) {
           closestItems[i] = item
@@ -86,7 +115,7 @@ class CenterFenceExtractor implements Extractor {
       }
     })
     console.log("CLOSEST ", closestItems)
-    return closestItems
+    return [closestItems, centers]
   }
 
   getMenuInDocument(answerData: any) {
