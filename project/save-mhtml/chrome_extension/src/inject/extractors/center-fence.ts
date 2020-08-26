@@ -34,6 +34,7 @@ class CenterFenceExtractor implements Extractor {
     let result = $("body")[0]
 
     const [possibles, centers] = this.closestElementsFromCenters()
+    console.log("다를 이유가 있나", centers)
     let data = {
       centerCoords: centers,
       reportOfCenters: new Array<any>()
@@ -51,13 +52,13 @@ class CenterFenceExtractor implements Extractor {
       let maxLinkRatio = 0
       let maxLinkElement
       parents.forEach((elem, index) => {
-        timestampedLog("parent ", index, elem)
+        // timestampedLog("parent ", index, elem)
         const numOfAnchors = $("a", elem).length
         const text = $(elem).text()
         const singleWhiteSpaced = text.replace(/\s\s+/g, ' ')
-        timestampedLog("ANCHOR", numOfAnchors)
-        timestampedLog("TEXT", text.length, singleWhiteSpaced.length)
-        timestampedLog("RATIO", singleWhiteSpaced.length / (1 + numOfAnchors))
+        // timestampedLog("ANCHOR", numOfAnchors)
+        // timestampedLog("TEXT", text.length, singleWhiteSpaced.length)
+        // timestampedLog("RATIO", singleWhiteSpaced.length / (1 + numOfAnchors))
         const report = {
           element: elem.outerHTML,
           numOfAnchors: numOfAnchors,
@@ -165,6 +166,7 @@ class CenterFenceExtractor implements Extractor {
     }
     centers.push(docCenter)
     console.assert(centers.length === numOfCenters, "Middle count got some errors")
+    console.log("Examined Centers", centers)
     return centers
   }
 
