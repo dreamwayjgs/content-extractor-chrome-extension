@@ -26,6 +26,7 @@ type ElementWithDistances = {
 
 class CenterFenceExtractor implements Extractor {
   name = "center-fence"
+  extractedElement = document.body
   constructor() { }
   extract() {
     timestampedLog("Starting Extracts")
@@ -41,11 +42,13 @@ class CenterFenceExtractor implements Extractor {
       AnswerOverlay.drawAnswer(item.elem, `Closest from ${index}`)
 
       const parents = this.parentDivs(item.elem)
-      AnswerOverlay.drawAnswer(parents[0], `Distance From ${index}: ${item.dist[index].toString()}`)
+      // AnswerOverlay.drawAnswer(parents[0], `Distance From ${index}: ${item.dist[index].toString()}`)
       const reportEachCenter = {
         center: item,
         elements: new Array<any>()
       }
+      let maxLinkRatio = 0
+      let maxLinkElement
       parents.forEach((elem, index) => {
         timestampedLog("parent ", index, elem)
         const numOfAnchors = $("a", elem).length
@@ -55,23 +58,31 @@ class CenterFenceExtractor implements Extractor {
         timestampedLog("TEXT", text.length, singleWhiteSpaced.length)
         timestampedLog("RATIO", singleWhiteSpaced.length / (1 + numOfAnchors))
         const report = {
-          element: elem,
+          element: elem.outerHTML,
           numOfAnchors: numOfAnchors,
           originalTextLength: text.length,
           reducedTextLength: singleWhiteSpaced.length,
           linkRatio: singleWhiteSpaced.length / (1 + numOfAnchors)
         }
+        if (maxLinkRatio < singleWhiteSpaced.length / (1 + numOfAnchors)) {
+          maxLinkRatio = singleWhiteSpaced.length / (1 + numOfAnchors)
+          maxLinkElement = elem
+        }
         reportEachCenter.elements.push(report)
       })
       data.reportOfCenters.push(reportEachCenter)
+      if (maxLinkElement) {
+        result = maxLinkElement
+      }
     })
 
     console.log("THIS IS RESULT", data)
+    this.extractedElement = result
 
     return {
       extractorName: this.name,
       title: "Not Found",
-      result: result,
+      result: this.extractedElement.outerHTML,
       raw: data
     }
   }

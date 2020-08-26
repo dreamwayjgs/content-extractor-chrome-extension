@@ -5,6 +5,7 @@ import $ from 'jquery'
 
 class MozReadabilityExtractor implements Extractor {
   name = "moz-readability"
+  extractedElement = document.body
   constructor() { }
   extract() {
     const documentClone = document.cloneNode(true)
@@ -14,10 +15,13 @@ class MozReadabilityExtractor implements Extractor {
     const hyu = $(extracted).children().first().attr('hyu')
     console.assert(hyu, "Not Tagged. Save again")
     const answer = $(`[hyu='${hyu}']`)
+
+    this.extractedElement = answer[0] ? answer[0] : document.body
+
     return {
       extractorName: this.name,
       title: article.title,
-      result: answer[0],
+      result: this.extractedElement.outerHTML,
       raw: article
     }
   }

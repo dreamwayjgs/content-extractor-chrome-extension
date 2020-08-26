@@ -59,7 +59,7 @@ function nudgeNewBox(boxA: HTMLElement, boxB: HTMLElement): [number, number] {
   const bounceB = new Boundary(boxB)
   let { left, top } = bounceB
   if (bounceA.isOverlapped(bounceB)) {
-    left = bounceA.right + 2 * padding
+    left = bounceA.right // + padding
   }
   return [left, top]
 }

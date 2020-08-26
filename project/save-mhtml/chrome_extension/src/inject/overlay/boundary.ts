@@ -149,6 +149,7 @@ class Boundary {
 
 function heronsFormular(a: number, b: number, c: number): number {
   // https://en.wikipedia.org/wiki/Heron%27s_formula
+  if (a * b * c === 0) return 0;
 
   const a2 = Math.pow(a, 2)
   const b2 = Math.pow(b, 2)

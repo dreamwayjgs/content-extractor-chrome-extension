@@ -7,11 +7,11 @@ import { ExtractorResult } from './extractors/extractor'
 export function extractedAnswers(): ExtractorResult[] {
   const moz = new MozReadabilityExtractor()
   const mozExtraction = moz.extract()
-  AnswerOverlay.drawAnswer(mozExtraction.result, moz.name)
+  AnswerOverlay.drawAnswer(moz.extractedElement, moz.name)
 
   const centerFence = new CenterFenceExtractor()
   const centerFenceExtraction = centerFence.extract()
-  AnswerOverlay.drawAnswer(centerFenceExtraction.result, centerFence.name)
+  AnswerOverlay.drawAnswer(centerFence.extractedElement, centerFence.name)
 
   return [mozExtraction, centerFenceExtraction]
 }
