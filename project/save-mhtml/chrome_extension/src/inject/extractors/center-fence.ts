@@ -20,6 +20,7 @@ const DIV_LIKE_SELECTOR = DIV_LIKE_TAGS.join(',')
 
 type ElementWithDistances = {
   elem: HTMLElement,
+  elemHTML: string,
   dist: number[]
 }
 
@@ -107,7 +108,8 @@ class CenterFenceExtractor implements Extractor {
         const boundary = new Boundary(<HTMLElement>elem)
         const distanceFromEachCenters = centers.map(center => boundary.distance(center))
         return {
-          elem: <HTMLElement>elem,
+          elem: elem,
+          elemHTML: elem.outerHTML,
           dist: distanceFromEachCenters
         }
       }
@@ -182,7 +184,6 @@ class CenterFenceExtractor implements Extractor {
     const top = height / 2
     return [left, top]
   }
-
 }
 
 export function createMarker(coordinates: Coordinates, color = "red", text = "marker"): HTMLElement {
