@@ -181,8 +181,10 @@ class CenterFenceExtractor implements Extractor {
     const body = document.body
     const height = Math.max(body.scrollHeight, body.offsetHeight,
       html.clientHeight, html.scrollHeight, html.offsetHeight);
+    const width = Math.max(body.scrollWidth, body.offsetWidth,
+      html.clientWidth, html.scrollWidth, html.offsetWidth);
 
-    const left = window.innerWidth / 2
+    const left = width / 2
     const top = height / 2
     return [left, top]
   }
