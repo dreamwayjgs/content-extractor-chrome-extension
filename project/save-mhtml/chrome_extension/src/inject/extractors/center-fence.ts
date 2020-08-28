@@ -39,6 +39,8 @@ class CenterFenceExtractor implements Extractor {
       centerCoords: centers,
       reportOfCenters: new Array<any>()
     }
+    let maxLinkRatio = 0
+    let maxLinkElement: HTMLElement
     possibles.forEach((item, index) => {
       timestampedLog("================Center " + index + " ============")
       AnswerOverlay.drawAnswer(item.elem, `Closest from ${index}`)
@@ -49,8 +51,6 @@ class CenterFenceExtractor implements Extractor {
         center: item,
         elements: new Array<any>()
       }
-      let maxLinkRatio = 0
-      let maxLinkElement
       parents.forEach((elem, index) => {
         // timestampedLog("parent ", index, elem)
         const numOfAnchors = $("a", elem).length
@@ -67,6 +67,7 @@ class CenterFenceExtractor implements Extractor {
           linkRatio: singleWhiteSpaced.length / (1 + numOfAnchors)
         }
         if (maxLinkRatio < singleWhiteSpaced.length / (1 + numOfAnchors)) {
+          console.log("MAX UP!", maxLinkRatio, "TO", singleWhiteSpaced.length / (1 + numOfAnchors))
           maxLinkRatio = singleWhiteSpaced.length / (1 + numOfAnchors)
           maxLinkElement = elem
         }

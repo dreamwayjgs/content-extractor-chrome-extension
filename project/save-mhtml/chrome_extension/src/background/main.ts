@@ -30,7 +30,7 @@ function main() {
         break
       case /^curation$/.test(command):
         timestampedLog("Curation requested")
-        // const curator = await Curator.createCuratorWithSelectedIds([4613259], request.option.auto)
+        // const curator = await Curator.createCuratorWithSelectedIds([6351642, 5207271], request.option.auto)
         const curator = await Curator.createCuratorWithAllIds(request.option.auto, { failed: false })
         chrome.tabs.create({ active: true }, tab => {
           console.assert(tab.id !== undefined)
