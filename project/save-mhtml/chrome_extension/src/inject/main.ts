@@ -1,7 +1,7 @@
 import { timestampedLog } from '../modules/debugger'
 import Preprocessor from './preprocessor'
 import { curation } from './curation-view'
-import { extractedAnswers } from './extractor-view'
+import { runExtractors } from './extractor-view'
 import { runTest } from './test'
 
 timestampedLog("Script injected at the beginning! Wait window full loading")
@@ -23,7 +23,7 @@ function main() {
         if (extractedInCuration) sendResponse(extractedInCuration)
         break
       case "extract":
-        const extracted = extractedAnswers()
+        const extracted = runExtractors()
         sendResponse(extracted)
         break
       case "test":

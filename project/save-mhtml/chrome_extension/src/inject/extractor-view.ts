@@ -1,10 +1,11 @@
 import AnswerOverlay from './overlay/answer'
 import MozReadabilityExtractor from './extractors/mozilla-readability'
 import CenterFenceExtractor from './extractors/center-fence'
-import { ExtractorResult } from './extractors/extractor'
+import SimpleLinkRatioExtractor from './extractors/simple-link-ratio'
+import Extractor from './extractors/extractor'
 
 
-export function extractedAnswers(): ExtractorResult[] {
+export function runExtractors(): Extractor[] {
   const moz = new MozReadabilityExtractor()
   const mozExtraction = moz.extract()
   AnswerOverlay.drawAnswer(moz.extractedElement, moz.name)
@@ -13,5 +14,9 @@ export function extractedAnswers(): ExtractorResult[] {
   const centerFenceExtraction = centerFence.extract()
   AnswerOverlay.drawAnswer(centerFence.extractedElement, centerFence.name)
 
-  return [mozExtraction, centerFenceExtraction]
+  const simpleLink = new SimpleLinkRatioExtractor()
+  const simpleLinkExtraction = simpleLink.extract()
+  AnswerOverlay.drawAnswer(simpleLink.extractedElement, simpleLink.name)
+
+  return [moz, centerFence]
 }

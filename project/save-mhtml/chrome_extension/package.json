@@ -20,8 +20,10 @@
     "@types/jquery": "^3.5.1",
     "@types/mozilla-readability": "^0.2.0",
     "@types/node": "^14.0.27",
+    "@types/node-fetch": "^2.5.7",
     "chrome-extension-async": "^3.4.1",
     "diff-sequences": "^26.3.0",
-    "jquery": "^3.5.1"
+    "jquery": "^3.5.1",
+    "string-punctuation-tokenizer": "^2.1.1"
   }
 }

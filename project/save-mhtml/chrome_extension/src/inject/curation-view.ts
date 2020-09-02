@@ -1,26 +1,36 @@
 import { timestampedLog } from '../modules/debugger'
-import AnswerOverlay from './overlay/answer'
+import AnswerOverlay, { Answer } from './overlay/answer'
 import Boundary from './overlay/boundary'
 import CenterFenceExtractor, { createMarker } from './extractors/center-fence'
-import { extractedAnswers } from './extractor-view'
+import { runExtractors } from './extractor-view'
 import { ExtractorResult } from './extractors/extractor'
+import { evaluate } from './evaluators/evaluator'
 
 
 export function curation(answerData: any[]): ExtractorResult[] | null {
   timestampedLog("Running in ", parent.frames.length)
-  curationAnswer(answerData)
-  return extractedAnswers()
+  const answers = curationAnswer(answerData)
+  const extractors = runExtractors()
+  // TODO: Pop one good answer
+  if (answers) {
+    const reports = evaluate(answers[0], extractors)
+    console.log("EVAL REPORT", reports)
+  }
+  return extractors.map(extractor => extractor.report)
   // examineAnswer(answerData[0]) // TODO: What answer would be chosen?
 }
 
-function curationAnswer(answerData: any[]) {
-  timestampedLog(answerData)
+function curationAnswer(answerData: any[]): Answer[] | null {
+  const answers: Answer[] = []
   answerData.forEach((answer: any) => {
     const cssSelector = answer["css_selector"]
     const mainContent: HTMLElement | null = <HTMLElement>document.querySelector(cssSelector)
-    timestampedLog("mc ", mainContent)
     if (mainContent !== null) {
       AnswerOverlay.drawAnswer(mainContent, answer["name"])
+      answers.push({
+        elem: mainContent,
+        name: answer.name
+      })
     }
     else {
       timestampedLog("You have null.. send this target")
@@ -31,6 +41,10 @@ function curationAnswer(answerData: any[]) {
       })
     }
   })
+  if (answers.length > 0) {
+    return answers
+  }
+  return null
 }
 
 function examineAnswer(answer: any) {

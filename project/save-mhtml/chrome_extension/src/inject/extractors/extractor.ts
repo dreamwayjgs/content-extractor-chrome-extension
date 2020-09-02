@@ -8,6 +8,7 @@ export interface ExtractorResult {
 interface Extractor {
   name: string
   extractedElement: HTMLElement
+  report: ExtractorResult
   extract: (...args: any[]) => ExtractorResult | Promise<ExtractorResult>
 }
 

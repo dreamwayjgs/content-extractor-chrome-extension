@@ -30,7 +30,7 @@ function main() {
         break
       case /^curation$/.test(command):
         timestampedLog("Curation requested")
-        // const curator = await Curator.createCuratorWithSelectedIds([6351642, 5207271], request.option.auto)
+        // const curator = await Curator.createCuratorWithSelectedIds([5062311], request.option.auto)
         const curator = await Curator.createCuratorWithAllIds(request.option.auto, { failed: false })
         chrome.tabs.create({ active: true }, tab => {
           console.assert(tab.id !== undefined)
@@ -52,6 +52,15 @@ function main() {
         break
       case /^request-center-statistics/.test(command):
         postCenterValues(request.aid, request.data)
+        break
+      case /^test/.test(command):
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+          console.assert(tabs[0].id !== undefined)
+          chrome.tabs.sendMessage(tabs[0].id!, {
+            command: "test"
+          })
+
+        });
         break
       default:
         // testSession(true)

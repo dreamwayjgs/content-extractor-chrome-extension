@@ -1,4 +1,4 @@
-import Extractor from './extractor'
+import Extractor, { ExtractorResult } from './extractor'
 import { Readability } from "@mozilla/readability"
 import $ from 'jquery'
 
@@ -6,6 +6,12 @@ import $ from 'jquery'
 class MozReadabilityExtractor implements Extractor {
   name = "moz-readability"
   extractedElement = document.body
+  report: ExtractorResult = {
+    extractorName: this.name,
+    title: "No Title",
+    result: "",
+    raw: {}
+  }
   constructor() { }
   extract() {
     const documentClone = document.cloneNode(true)
@@ -17,13 +23,13 @@ class MozReadabilityExtractor implements Extractor {
     const answer = $(`[hyu='${hyu}']`)
 
     this.extractedElement = answer[0] ? answer[0] : document.body
-
-    return {
+    this.report = {
       extractorName: this.name,
       title: article.title,
       result: this.extractedElement.outerHTML,
       raw: article
     }
+    return this.report
   }
 }
 

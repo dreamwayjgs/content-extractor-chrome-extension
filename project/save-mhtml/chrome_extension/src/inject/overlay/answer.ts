@@ -9,6 +9,11 @@ abstract class Overlay {
   abstract draw(): void
 }
 
+export interface Answer {
+  elem: HTMLElement,
+  name: string
+}
+
 class AnswerOverlay extends Overlay {
   static overlays: AnswerOverlay[] = []
 

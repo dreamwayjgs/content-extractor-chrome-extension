@@ -1,8 +1,9 @@
-import Extractor from "./extractor";
+import Extractor, { ExtractorResult } from "./extractor";
 import $ from 'jquery'
 import AnswerOverlay from "../overlay/answer";
 import Boundary, { Coordinates, ZeroAreaElementException } from '../overlay/boundary'
 import Border from "../overlay/border";
+import { elementTextPerLink } from './text-and-link'
 import { timestampedLog } from "../../modules/debugger";
 
 
@@ -28,13 +29,18 @@ type ElementWithDistances = {
 class CenterFenceExtractor implements Extractor {
   name = "center-fence"
   extractedElement = document.body
+  report: ExtractorResult = {
+    extractorName: this.name,
+    title: "No Title",
+    result: "",
+    raw: {}
+  }
   constructor() { }
   extract() {
     timestampedLog("Starting Extracts")
     let result = $("body")[0]
 
     const [possibles, centers] = this.closestElementsFromCenters()
-    console.log("다를 이유가 있나", centers)
     let data = {
       centerCoords: centers,
       reportOfCenters: new Array<any>()
@@ -46,29 +52,15 @@ class CenterFenceExtractor implements Extractor {
       AnswerOverlay.drawAnswer(item.elem, `Closest from ${index}`)
 
       const parents = this.parentDivs(item.elem)
-      // AnswerOverlay.drawAnswer(parents[0], `Distance From ${index}: ${item.dist[index].toString()}`)
       const reportEachCenter = {
         center: item,
         elements: new Array<any>()
       }
       parents.forEach((elem, index) => {
-        // timestampedLog("parent ", index, elem)
-        const numOfAnchors = $("a", elem).length
-        const text = $(elem).text()
-        const singleWhiteSpaced = text.replace(/\s\s+/g, ' ')
-        // timestampedLog("ANCHOR", numOfAnchors)
-        // timestampedLog("TEXT", text.length, singleWhiteSpaced.length)
-        // timestampedLog("RATIO", singleWhiteSpaced.length / (1 + numOfAnchors))
-        const report = {
-          element: elem.outerHTML,
-          numOfAnchors: numOfAnchors,
-          originalTextLength: text.length,
-          reducedTextLength: singleWhiteSpaced.length,
-          linkRatio: singleWhiteSpaced.length / (1 + numOfAnchors)
-        }
-        if (maxLinkRatio < singleWhiteSpaced.length / (1 + numOfAnchors)) {
-          console.log("MAX UP!", maxLinkRatio, "TO", singleWhiteSpaced.length / (1 + numOfAnchors))
-          maxLinkRatio = singleWhiteSpaced.length / (1 + numOfAnchors)
+        const report = elementTextPerLink(elem)
+        if (maxLinkRatio < report.linkRatio) {
+          console.log("MAX UP!", maxLinkRatio, "TO", report.linkRatio)
+          maxLinkRatio = report.linkRatio
           maxLinkElement = elem
         }
         reportEachCenter.elements.push(report)
@@ -82,12 +74,13 @@ class CenterFenceExtractor implements Extractor {
     console.log("THIS IS RESULT", data)
     this.extractedElement = result
 
-    return {
+    this.report = {
       extractorName: this.name,
       title: "Not Found",
       result: this.extractedElement.outerHTML,
       raw: data
     }
+    return this.report
   }
 
   parentDivs(elem: HTMLElement) {
@@ -119,10 +112,9 @@ class CenterFenceExtractor implements Extractor {
         return null
       }
     })
-    const removedLineOrPoint: ElementWithDistances[] = elemsWithDistancesFromCenters.filter((el): el is ElementWithDistances => el !== null)
-    console.log("LEN", elemsWithDistancesFromCenters.length, removedLineOrPoint.length)
-    let closestItems: ElementWithDistances[] = Array(centers.length).fill(removedLineOrPoint[0])
-    removedLineOrPoint.forEach(item => {
+    const nonZeroAreaElems: ElementWithDistances[] = elemsWithDistancesFromCenters.filter((el): el is ElementWithDistances => el !== null)
+    let closestItems: ElementWithDistances[] = Array(centers.length).fill(nonZeroAreaElems[0])
+    nonZeroAreaElems.forEach(item => {
       for (let i = 0; i < item.dist.length; i++) {
         if (item.dist[i] < closestItems[i].dist[i]) {
           closestItems[i] = item
