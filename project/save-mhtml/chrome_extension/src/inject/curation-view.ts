@@ -4,17 +4,19 @@ import Boundary from './overlay/boundary'
 import CenterFenceExtractor, { createMarker } from './extractors/center-fence'
 import { runExtractors } from './extractor-view'
 import { ExtractorResult } from './extractors/extractor'
-import { evaluate } from './evaluators/evaluator'
+import { evaluate, EvaluationReport } from './evaluators/evaluator'
 
 
-export function curation(answerData: any[]): ExtractorResult[] | null {
+export function curation(answerData: any[]): ExtractorResult[] | [ExtractorResult[], EvaluationReport[]] | null {
   timestampedLog("Running in ", parent.frames.length)
   const answers = curationAnswer(answerData)
   const extractors = runExtractors()
   // TODO: Pop one good answer
   if (answers) {
+    console.log("앤서 체크")
     const reports = evaluate(answers[0], extractors)
     console.log("EVAL REPORT", reports)
+    return [extractors.map(extractor => extractor.report), reports]
   }
   return extractors.map(extractor => extractor.report)
   // examineAnswer(answerData[0]) // TODO: What answer would be chosen?

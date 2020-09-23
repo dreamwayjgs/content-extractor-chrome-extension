@@ -12,4 +12,5 @@ export function runTest() {
   // testBoundary.testHeron([180, 190])
   // testBoundary.testHeron([340, 330])
   wordTokenReport("정근성 차재혁", "정근성,.,.; 차재혁 정근성")
+  wordTokenReport(document.createElement('a'), "정근성성")
 }

@@ -199,6 +199,7 @@ export async function postCenterValuesAction(ctx: Context) {
 }
 
 export async function postExtractorResultAction(ctx: Context) {
+  console.log("ON: extractor result upload")
   const body = ctx.request.body
   const client = getPgClient()
   try {
@@ -207,6 +208,9 @@ export async function postExtractorResultAction(ctx: Context) {
     const data = body.result
 
     console.log(id)
+    const extracted = JSON.parse(data)
+    console.log(extracted[1])
+    console.log(extracted[1][0][0]['report'].length)
 
     const sql = "UPDATE target_page SET extractor_report = $2 WHERE id = $1"
     const values = [id, data]
@@ -214,6 +218,7 @@ export async function postExtractorResultAction(ctx: Context) {
     console.assert(res.rowCount === 1, "UPDATE FAILED")
     await client.query("COMMIT")
     ctx.body = "Received"
+    console.log("OK")
   }
   catch (err) {
     await client.query("ROLLBACK")

@@ -1,6 +1,7 @@
 import { timestampedLog, timestampedAssert } from '../modules/debugger'
 import Article, { ArticleType, ArticlePath, AnsweredArticle } from '../entities/Article'
 import { ExtractorResult } from '../inject/extractors/extractor'
+import { EvaluationReport } from '../inject/evaluators/evaluator'
 
 
 const endpoint = "http://127.0.0.1:53000"
@@ -101,11 +102,11 @@ export function postNoContentAnswer(aid: number, uid: number) {
   })
 }
 
-export function postExtractorReport(id: number, result: ExtractorResult[]) {
-  timestampedLog("SEND EXTRACTOR RESULT", result)
+export function postExtractorReport(id: number, result: ExtractorResult[] | [ExtractorResult[], EvaluationReport[]]) {
   let formData = new FormData()
   formData.append('id', id.toString())
   formData.append('result', JSON.stringify(result))
+  console.log("SENDING", result)
 
   const target = "/article/extractor/report"
   fetch(endpoint + target, {

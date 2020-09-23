@@ -20,7 +20,9 @@ function main() {
         break
       case "curation":
         const extractedInCuration = curation(request.answerData)
-        if (extractedInCuration) sendResponse(extractedInCuration)
+        if (extractedInCuration) {
+          sendResponse(extractedInCuration)
+        }
         break
       case "extract":
         const extracted = runExtractors()

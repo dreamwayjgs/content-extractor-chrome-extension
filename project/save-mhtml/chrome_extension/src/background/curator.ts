@@ -2,6 +2,7 @@ import Article, { ArticlePath } from "../entities/Article"
 import { getArticlesById, getArticleFile, getArticlesUrl, getArticleCheckedAnswer, postNoContentAnswer, postExtractorReport } from "./server"
 import { timestampedLog } from "../modules/debugger"
 import { ExtractorResult } from "../inject/extractors/extractor"
+import { EvaluationReport } from "../inject/evaluators/evaluator"
 
 
 class Curator {
@@ -90,7 +91,7 @@ class Curator {
   }
 
   loadPage(article: Article) {
-    timestampedLog(`Page : ${this.currentIndex}/${this.articles.length}`)
+    timestampedLog(`Page: ${this.articles[this.currentIndex].id} Progress : ${this.currentIndex}/${this.articles.length}`)
     if (article.filename && article.filename !== "file.txt") {
       timestampedLog("Open previously downloaded page")
       this.openPage(article)
@@ -156,7 +157,7 @@ class Curator {
   }
 
   sendAnswerDataToContentScript(answerData: any) {
-    chrome.tabs.sendMessage(this.tabId, { command: "curation", answerData: answerData, articleId: this.articles[this.currentIndex].id }, (response: ExtractorResult[]) => {
+    chrome.tabs.sendMessage(this.tabId, { command: "curation", answerData: answerData, articleId: this.articles[this.currentIndex].id }, (response: ExtractorResult[] | [ExtractorResult[], EvaluationReport[]]) => {
       const lastError = chrome.runtime.lastError
       const id = this.articles[this.currentIndex].id
       if (lastError)

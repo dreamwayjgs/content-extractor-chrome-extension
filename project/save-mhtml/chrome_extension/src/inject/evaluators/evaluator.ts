@@ -5,7 +5,9 @@ import Extractor from '../extractors/extractor'
 import { tokenize } from 'string-punctuation-tokenizer'
 
 
-export function evaluate(answer: Answer, evaluatees: Extractor[]) {
+export type EvaluationReport = any
+
+export function evaluate(answer: Answer, evaluatees: Extractor[]): EvaluationReport[] {
   console.log("EVAULATION ON", answer)
   const reports = []
   reports.push(evaluatees.map(evaluatee => (
@@ -32,25 +34,41 @@ export function evaluate(answer: Answer, evaluatees: Extractor[]) {
       description: "IoU Evaluation"
     }
   )))
+  reports.push(evaluatees.map(evaluatee => (
+    {
+      report: wordTokenReport(answer.elem, evaluatee.extractedElement),
+      answer: answer.name,
+      evaluatee: evaluatee.name,
+      description: "word token test"
+    }
+  )))
+
+  console.log("EVAL REPORT RETURN: ", reports)
   return reports
 }
 
 function lcsOnElements(relevant: HTMLElement, retrieved: HTMLElement, reducedWhiteSpaces = false) {
   console.log("Calc with", retrieved)
-  const scoringHTML = lcsF1Report(relevant.outerHTML, retrieved.outerHTML, reducedWhiteSpaces)
+  const scoringHTML = lcsF1Report(relevant.outerHTML, retrieved.outerHTML, reducedWhiteSpaces, 'html')
   const relevantText = relevant.textContent
   const retrievedText = retrieved.textContent
   if (relevantText === null || retrievedText === null) {
     console.log("No text in elements")
     return [scoringHTML, "NOTEXT"]
+    // return {
+    //   subReports: [scoringHTML, "NOTEXT"]
+    // }
   }
   else {
     const scoringText = lcsF1Report(relevantText, retrievedText, reducedWhiteSpaces)
     return [scoringHTML, scoringText]
+    // return {
+    //   subReports: [scoringHTML, scoringText]
+    // }
   }
 }
 
-function lcsF1Report(relevant: string, retrieved: string, reducedWhiteSpaces = false) {
+function lcsF1Report(relevant: string, retrieved: string, reducedWhiteSpaces = false, textType = "text") {
   const text1: string = reducedWhiteSpaces ? relevant.replace(/\s\s+/g, ' ') : relevant
   const text2 = reducedWhiteSpaces ? retrieved.replace(/\s\s+/g, ' ') : retrieved
   const lcs = findCommonItems(text1, text2)
@@ -60,7 +78,8 @@ function lcsF1Report(relevant: string, retrieved: string, reducedWhiteSpaces = f
   const report = {
     "mode": "lcs",
     "option": {
-      "reducedWhiteSpaces": reducedWhiteSpaces
+      "reducedWhiteSpaces": reducedWhiteSpaces,
+      "textType": textType
     },
     "relevantLength": text1.length,
     "retrievedLength": text2.length,
@@ -71,13 +90,28 @@ function lcsF1Report(relevant: string, retrieved: string, reducedWhiteSpaces = f
   return report
 }
 
-export function wordTokenReport(relevant: string, retrieved: string) {
-  const wordVector1: string = tokenize({ text: relevant })
-  const wordVector2: string = tokenize({ text: retrieved })
-  console.log(wordVector1)
-  console.log(wordVector2)
-  console.log(new Set(wordVector1))
-  console.log(new Set(wordVector2))
+export function wordTokenReport(relevant: string | HTMLElement, retrieved: string | HTMLElement) {
+  const wordVector1: string = tokenize({ text: relevant instanceof HTMLElement ? relevant.textContent : relevant })
+  const wordVector2: string = tokenize({ text: retrieved instanceof HTMLElement ? retrieved.textContent : retrieved })
+  const wordSet1 = new Set(wordVector1)
+  const wordSet2 = new Set(wordVector2)
+  console.log("사이즈")
+  console.log(wordSet1.size, wordSet2.size)
+  const intersection = new Set<string>(Array.from(wordSet1).filter(x => wordSet2.has(x)));
+  console.log(intersection.size)
+  const precision = intersection.size / wordSet2.size
+  const recall = intersection.size / wordSet1.size
+  const f1 = (2 * precision * recall) / (precision + recall)
+  const report = {
+    "mode": "Word Token Set",
+    "relevantLength": wordSet1.size,
+    "retrievedLength": wordSet2.size,
+    "precision": precision,
+    "recall": recall,
+    "f1": f1
+  }
+  return report
+
 }
 
 export function iouF1Report(relevant: HTMLElement, retrieved: HTMLElement) {
