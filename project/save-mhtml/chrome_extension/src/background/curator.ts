@@ -163,7 +163,7 @@ class Curator {
       if (lastError)
         timestampedLog("In content", lastError);
       timestampedLog("From Content Response. Sending...")
-      console.assert(response.length > 1, "Response is not an array", response)
+      console.assert(response.length > 1, "Response is not an array " + this.tabId, response)
       postExtractorReport(id, response)
     })
   }

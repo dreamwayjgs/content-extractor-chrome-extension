@@ -1,5 +1,5 @@
 import Extractor, { ExtractorResult } from './extractor'
-import { Readability } from "@mozilla/readability"
+import { Readability, isProbablyReaderable } from "@mozilla/readability"
 import $ from 'jquery'
 
 
@@ -20,6 +20,7 @@ class MozReadabilityExtractor implements Extractor {
     const extracted = article.content
     const hyu = $(extracted).children().first().attr('hyu')
     console.assert(hyu, "Not Tagged. Save again")
+    console.log("IS REDABLE", isProbablyReaderable(document))
     const answer = $(`[hyu='${hyu}']`)
 
     this.extractedElement = answer[0] ? answer[0] : document.body
@@ -27,7 +28,10 @@ class MozReadabilityExtractor implements Extractor {
       extractorName: this.name,
       title: article.title,
       result: this.extractedElement.outerHTML,
-      raw: article
+      raw: {
+        article: article,
+        readable: isProbablyReaderable(document)
+      }
     }
     return this.report
   }

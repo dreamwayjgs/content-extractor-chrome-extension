@@ -48,12 +48,10 @@ export function evaluate(answer: Answer, evaluatees: Extractor[]): EvaluationRep
 }
 
 function lcsOnElements(relevant: HTMLElement, retrieved: HTMLElement, reducedWhiteSpaces = false) {
-  console.log("Calc with", retrieved)
   const scoringHTML = lcsF1Report(relevant.outerHTML, retrieved.outerHTML, reducedWhiteSpaces, 'html')
   const relevantText = relevant.textContent
   const retrievedText = retrieved.textContent
   if (relevantText === null || retrievedText === null) {
-    console.log("No text in elements")
     return [scoringHTML, "NOTEXT"]
     // return {
     //   subReports: [scoringHTML, "NOTEXT"]
@@ -95,10 +93,7 @@ export function wordTokenReport(relevant: string | HTMLElement, retrieved: strin
   const wordVector2: string = tokenize({ text: retrieved instanceof HTMLElement ? retrieved.textContent : retrieved })
   const wordSet1 = new Set(wordVector1)
   const wordSet2 = new Set(wordVector2)
-  console.log("사이즈")
-  console.log(wordSet1.size, wordSet2.size)
   const intersection = new Set<string>(Array.from(wordSet1).filter(x => wordSet2.has(x)));
-  console.log(intersection.size)
   const precision = intersection.size / wordSet2.size
   const recall = intersection.size / wordSet1.size
   const f1 = (2 * precision * recall) / (precision + recall)
