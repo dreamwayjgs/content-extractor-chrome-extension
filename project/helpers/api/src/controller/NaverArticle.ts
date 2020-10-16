@@ -159,6 +159,7 @@ export async function postArticleAction(ctx: Context) {
       values.push(body.id)
     }
 
+    //extraction_log saved, mhtml, webpage
     const res = await client.query(sql, values)
     console.assert(res.rowCount === 1, "UPDATE FAILED")
     await client.query("COMMIT")
