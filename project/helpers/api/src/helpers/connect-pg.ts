@@ -5,6 +5,7 @@ import { Pool, Client } from 'pg'
 function connectPg(filename = "db.properties", targetDb = "cssc") {
   const dbPropList = JSON.parse(readFileSync(filename, { encoding: "utf8" }))
   const dbProps = dbPropList[targetDb]
+  console.log("뭐야", dbProps)
   return dbProps
 }
 

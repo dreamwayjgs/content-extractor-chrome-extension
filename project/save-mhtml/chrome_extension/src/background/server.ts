@@ -1,5 +1,5 @@
 import { timestampedLog, timestampedAssert } from '../modules/debugger'
-import Article, { ArticleType, ArticlePath, AnsweredArticle } from '../entities/Article'
+import Article, { ArticleType, ArticlePath, CrawlLog } from '../entities/Article'
 import { ExtractorResult } from '../inject/extractors/extractor'
 import { EvaluationReport } from '../inject/evaluators/evaluator'
 
@@ -15,26 +15,31 @@ export async function establish() {
   return true
 }
 
+
+export async function getArticles(from?: number, size?: number) {
+  const url = new URL('articles', endpoint)
+  const body = await fetch(url.toString()).then(res => res.json())
+  return body
+}
+
+export async function getArticlesById(ids: number[]) {
+  const url = new URL('article', endpoint)
+  ids.forEach(id => {
+    url.searchParams.append('id', id.toString())
+  })
+  const body = await fetch(url.toString()).then(res => res.json())
+  return body
+}
+
 export async function getArticlesUrl(filter: ArticlePath, from?: number, size: number = 1): Promise<Article[]> {
   const target = (from !== undefined) ? `/articles${filter}?from=${from}&size=${size}` : `/articles${filter}`
   console.log(target, from)
   const body = await fetch(endpoint + target).then(res => res.json())
   const articles = body.map((x: ArticleType) => {
-    const article = new Article(x.id, x.url_origin)
+    const article = new Article(x.id, x.url)
     return article
   })
   return articles
-}
-
-export async function getArticlesById(ids: number[]) {
-  const params: URLSearchParams = new URLSearchParams()
-  ids.forEach(id => {
-    params.append('id', id.toString())
-  })
-  const target = '/article'
-  const url = `${endpoint}${target}?${params.toString()}`
-  const body = await fetch(url).then(res => res.json())
-  return Article.fromArray(body)
 }
 
 export function getArticleFile(id: number) {
@@ -50,22 +55,28 @@ export async function getArticleCheckedAnswer(aid: number) {
   return body
 }
 
-export function postArticle(id: number, log?: any, mhtml?: any, webpage?: any, subPath = "") {
-  timestampedAssert(log.saved, "POST", id, log, mhtml)
+export function postArticle(data: CrawlLog) {
+  timestampedAssert(data.stored, "POST", data)
   let formData = new FormData()
-  formData.append('id', id.toString())
-  formData.append('log', JSON.stringify(log))
-  if (mhtml) formData.append('mhtml', mhtml);
-  if (webpage) formData.append('webpage', JSON.stringify(webpage));
-
-  const target = "/article" + subPath
-  fetch(endpoint + target, {
+  for (const [key, value] of Object.entries<any>(data)) {
+    if (typeof (value) === 'string' || value instanceof Blob) {
+      formData.append(key, value)
+    }
+    else if (typeof value === 'object') {
+      formData.append(key, JSON.stringify(value))
+    }
+    else {
+      formData.append(key, value.toString())
+    }
+  }
+  const url = new URL('article', endpoint)
+  fetch(url.toString(), {
     method: "POST",
     body: formData
   }).then(res => {
-
+    console.log("OK", res)
   }).catch(reason => {
-    console.log("POST Failed")
+    console.error(reason)
   })
 }
 

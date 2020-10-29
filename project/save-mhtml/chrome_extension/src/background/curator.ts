@@ -43,7 +43,8 @@ class Curator {
   }
 
   static async createCuratorWithSelectedIds(ids: number[], automatic = false) {
-    const articles = await getArticlesById(ids)
+    const body = await getArticlesById(ids)
+    const articles = Article.fromArray(body)
     Curator.instance = new Curator(articles)
     Curator.instance.automatic = automatic
     return Curator.instance

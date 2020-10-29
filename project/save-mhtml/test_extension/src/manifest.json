@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "MHTML Saver",
-  "version": "2.0.1",
+  "name": "MHTML Saver Test Suite",
+  "version": "0.0.1",
   "description": "HanYang University DB LAB Crawler",
-  "author": "Minwoo Park / Geunseong Jung",
+  "author": "Geunseong Jung",
   "homepage_url": "http://db.hayang.ac.kr",
   "icons": {
     "16": "icons/icon.png",

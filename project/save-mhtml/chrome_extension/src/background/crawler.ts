@@ -32,7 +32,8 @@ class Crawler {
   }
 
   static async pickPagesWithId(ids: number[]) {
-    const articles = await getArticlesById(ids)
+    const body = await getArticlesById(ids)
+    const articles = Article.fromArray(body)
     timestampedLog("TARGETS: ", articles)
     return new Crawler(articles)
   }
@@ -44,13 +45,6 @@ class Crawler {
     chrome.webNavigation.onCompleted.addListener(this.onLoadAction)
     chrome.webNavigation.onCommitted.addListener(this.onCommittedAction)
     this.loadPage()
-  }
-
-  crawlOne(tabId: number) {
-    timestampedLog("CrawlOne starts...")
-    this.tabId = tabId
-
-    // TODO: Search any current page in database or insert new one
   }
 
   saveOnTimeoutForDelayedPage(details: chrome.webNavigation.WebNavigationFramedCallbackDetails) {
@@ -98,23 +92,35 @@ class Crawler {
       const numOfFrames = (await chrome.webNavigation.getAllFrames({ tabId: tabId }))?.length
 
       try {
-        timestampedLog("Saving pages...", articleId, details.url)
+        timestampedLog("Saving pages...", articleId, details)
         const page = await chrome.pageCapture.saveAsMHTML({ tabId: tabId })
-        postArticle(articleId, {
-          timestamp: new Date().toISOString(),
-          status: "Success",
-          saved: true,
-          pageStatus: normallyLoaded,
-          numOfFrames: numOfFrames
-        }, page, res.webpage)
+        postArticle({
+          article_id: articleId,
+          history: {
+            timestamp: new Date().toISOString(),
+            status: "Success",
+            saved: true,
+            pageStatus: normallyLoaded,
+            numOfFrames: numOfFrames
+          },
+          stored: true,
+          node: res.webpage,
+          saved_at: new Date().toISOString(),
+          mhtml: page
+        })
       } catch (e) {
         timestampedLog("Saving Failed")
-        postArticle(articleId, {
-          timestamp: new Date().toISOString(),
-          status: "Failed",
-          saved: false,
-          pageStatus: normallyLoaded,
-          numOfFrames: numOfFrames
+        postArticle({
+          article_id: articleId,
+          history: {
+            timestamp: new Date().toISOString(),
+            status: "Failed",
+            saved: false,
+            pageStatus: normallyLoaded,
+            numOfFrames: numOfFrames
+          },
+          stored: false,
+          saved_at: new Date().toISOString()
         })
       }
       this.currentIndex++
@@ -131,7 +137,7 @@ class Crawler {
       return
     }
 
-    const url = this.articles[index].url_origin
+    const url = this.articles[index].url
     timestampedLog("Open page", url)
     this.saveStarted = false
     chrome.tabs.update(tabId, { url: url })

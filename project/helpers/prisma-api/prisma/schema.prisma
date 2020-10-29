@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model article {
+  source_key         Int
+  url                String
+  site_name          String
+  id                 Int                  @id @default(autoincrement())
+  source             String
+  center_points      center_points[]
+  crawl_log          crawl_log[]
+  evaluation_result  evaluation_result[]
+  extractor_result   extractor_result[]
+  page_block_attr    page_block_attr[]
+  page_element_attrs page_element_attrs[]
+
+  @@unique([source_key, source], name: "unique_source")
+  @@index([id], name: "index_article_pkey")
+}
+
+model article_source {
+  id                Int    @id @default(autoincrement())
+  source_table_name String @unique
+}
+
+model center_points {
+  article_id Int
+  coords     Json
+  is_overlap Json
+  id         Int     @id @default(autoincrement())
+  article    article @relation(fields: [article_id], references: [id])
+}
+
+model evaluation_result {
+  extractor  String
+  respondent String
+  report     Json
+  type       String
+  article_id Int
+  id         Int     @id @default(autoincrement())
+  article    article @relation(fields: [article_id], references: [id])
+}
+
+model extractor_result {
+  title      String
+  result     String
+  extractor  String
+  article_id Int
+  id         Int     @id @default(autoincrement())
+  raw        Json
+  article    article @relation(fields: [article_id], references: [id])
+}
+
+model page_element_attrs {
+  attrs      Json?
+  article_id Int
+  id         Int     @id @default(autoincrement())
+  article    article @relation(fields: [article_id], references: [id])
+}
+
+model naver_article {
+  id                Int      @id
+  aid_naver         Int
+  title             String
+  content           String
+  date              DateTime
+  url_naver         String
+  url_origin        String
+  subcategory_naver String?
+  category_naver    String?
+  press             String
+  pdf               String?
+  num_comment       Int?
+  source            String
+}
+
+model page_block_attr {
+  tag             String?
+  attr            Json?
+  text_similarity Float?
+  body_text       String?
+  id              Int     @id @default(autoincrement())
+  block_type      String
+  article_id      Int
+  article         article @relation(fields: [article_id], references: [id])
+}
+
+/// 
+model original_page_full_data {
+  id                      Int       @id
+  aid_naver               Int?
+  title                   String?
+  content                 String?
+  date                    DateTime?
+  url_naver               String?
+  url_origin              String?
+  subcategory_naver       String?
+  category_naver          String?
+  press                   String?
+  pdf                     String?
+  num_comment             Int?
+  content_block_tag       String?
+  content_block_attr      Json?
+  similarity              Float?
+  text_count              Int?
+  content_block_body_text String?
+  extraction_log          Json?
+  // This type is currently not supported.
+  // mhtml                bytea?
+  saved                   Boolean?
+  webpage                 Json?
+  center_values           Json?
+  extractor_report        Json?
+}
+
+model alexa_top_ranking_site {
+  id       Int      @id @default(autoincrement())
+  url      String
+  saved_at DateTime
+  site     String
+  source   String
+
+  @@unique([url, saved_at], name: "alexa_top_ranking_sites_url_saved_at_key")
+}
+
+model test_page {
+  id       Int      @id @default(autoincrement())
+  url      String
+  saved_at DateTime
+  site     String
+  source   String
+
+  @@unique([url, saved_at], name: "test_site_url_saved_at_key")
+}
+
+model crawl_log {
+  history    Json?
+  stored     Boolean?
+  node       Json?
+  article_id Int?
+  id         Int      @id @default(autoincrement())
+  saved_at   DateTime
+  filename   String?
+  article    article? @relation(fields: [article_id], references: [id])
+
+  @@unique([article_id, saved_at], name: "article_id_saved_at_unique")
+}

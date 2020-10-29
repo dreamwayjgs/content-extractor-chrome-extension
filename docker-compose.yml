@@ -2,11 +2,12 @@ version: '3'
 
 services:
     node:        
-        image: node
+        image: node:14
         volumes:
-            - .:/workspace
+            - .:/workspace:delegated
         stdin_open: true
         tty: true
         ports: 
             - 53000:53000
+            - 5555:5555
     

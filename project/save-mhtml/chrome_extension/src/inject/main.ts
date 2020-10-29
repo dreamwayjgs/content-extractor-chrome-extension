@@ -2,7 +2,6 @@ import { timestampedLog } from '../modules/debugger'
 import Preprocessor from './preprocessor'
 import { curation } from './curation-view'
 import { runExtractors } from './extractor-view'
-import { runTest } from './test'
 
 timestampedLog("Script injected at the beginning! Wait window full loading")
 
@@ -27,10 +26,6 @@ function main() {
       case "extract":
         const extracted = runExtractors()
         sendResponse(extracted)
-        break
-      case "test":
-        console.log("runTEST")
-        runTest()
         break
     }
   })

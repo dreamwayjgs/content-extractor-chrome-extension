@@ -1,27 +1,42 @@
 import { getArticleCheckedAnswer } from "../background/server"
-import { timestampedAssert, timestampedLog } from "../modules/debugger"
+import { timestampedLog } from "../modules/debugger"
 
 export interface ArticleType {
   id: number
-  url_origin: string
+  url: string
+}
+
+export interface CrawlLog {
+  article_id: number
+  history?: any
+  stored: boolean
+  node?: any
+  saved_at: string | Date
+  mhtml?: any
+}
+
+export interface ArticleView extends ArticleType {
+  id: number
+  url: string
+  crawl_log: CrawlLog[]
 }
 
 export type ArticlePath = "" | "/failed"
 
 class Article implements ArticleType {
   id: number
-  url_origin: string
+  url: string
   log?: string | JSON | Object
   filename?: string
 
   constructor(id: number, url: string) {
     this.id = id
-    this.url_origin = url
+    this.url = url
   }
 
   static fromArray(body: any[]) {
     const articles = body.map((x: ArticleType) => {
-      const article = new Article(x.id, x.url_origin)
+      const article = new Article(x.id, x.url)
       return article
     })
     return articles
