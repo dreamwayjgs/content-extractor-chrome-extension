@@ -8,6 +8,9 @@ import Article from '../entities/Article'
 
 function main() {
   console.log("hello backround")
+  chrome.storage.sync.get(({ articles }) => {
+    console.log("Starting with:", articles)
+  })
   establish()
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -18,18 +21,20 @@ function main() {
       case /^view/.test(command):
         if (request.testMode) {
           // getArticlesById([296]).then(body => {
-          getArticlesById([6, 21, 296]).then(body => {
+          getArticlesById([37/* , 21 */]).then(body => {
             response["message"] = "view"
             response["articles"] = body
             console.log(body)
             sendResponse(response)
           })
         }
-        getArticles().then(body => {
-          response["message"] = "view"
-          response["articles"] = body
-          sendResponse(response)
-        })
+        else {
+          getArticles().then(body => {
+            response["message"] = "view"
+            response["articles"] = body
+            sendResponse(response)
+          })
+        }
         break
       case /^crawl/.test(command):
         const articles = Article.fromArray(request.body)
@@ -40,31 +45,21 @@ function main() {
           console.log("New tab updated")
           crawler.crawl(tab.id!)
         })
-        // singleTest(true).then(crawler => {
-        //   timestampedLog("Crawl requested")
-        //   chrome.tabs.create({ active: true }, tab => {
-        //     console.assert(tab.id !== undefined)
-        //     console.log("New tab updated")
-        //     crawler.crawl(tab.id!)
-        //   })
-        // })
         break
-      // case /^capture/.test(command):
-      //   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      //     console.assert(tabs[0].id !== undefined)
-      //     console.log("crawl in current tab")
-      //     crawler.crawlOne(tabs[0].id!)
-      //   });
-      //   break
       case /^curation$/.test(command):
-        timestampedLog("Curation requested")
-        Curator.createCuratorWithSelectedIds([4028570, 3938741, 6216964, 3818059, 4834017, 5497523, 3522203], request.option.auto).then(curator => {
+        Curator.createCurator(Article.fromArray(request.body), true).then(curator => {
           chrome.tabs.create({ active: true }, tab => {
             console.assert(tab.id !== undefined)
-            console.log("New tab updated")
             if (tab.id) curator.start(tab.id)
           })
         })
+        // Curator.createCuratorWithSelectedIds([4028570, 3938741, 6216964, 3818059, 4834017, 5497523, 3522203], request.option.auto).then(curator => {
+        //   chrome.tabs.create({ active: true }, tab => {
+        //     console.assert(tab.id !== undefined)
+        //     console.log("New tab updated")
+        //     if (tab.id) curator.start(tab.id)
+        //   })
+        // })
         // const curator = await Curator.createCuratorWithAllIds(request.option.auto, { failed: false })
 
         break

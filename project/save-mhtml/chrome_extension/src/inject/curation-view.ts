@@ -13,7 +13,6 @@ export function curation(answerData: any[]): ExtractorResult[] | [ExtractorResul
   const extractors = runExtractors()
   // TODO: Pop one good answer
   if (answers) {
-    console.log("앤서 체크")
     const reports = evaluate(answers[0], extractors)
     console.log("EVAL REPORT", reports)
     return [extractors.map(extractor => extractor.report), reports]
@@ -28,10 +27,13 @@ function curationAnswer(answerData: any[]): Answer[] | null {
     const cssSelector = answer["css_selector"]
     const mainContent: HTMLElement | null = <HTMLElement>document.querySelector(cssSelector)
     if (mainContent !== null) {
-      AnswerOverlay.drawAnswer(mainContent, answer["name"])
+      const name = answer.naver_check_user.name
+      AnswerOverlay.drawAnswer(mainContent, name)
       answers.push({
         elem: mainContent,
-        name: answer.name
+        naver_check_user: {
+          name: name
+        }
       })
     }
     else {

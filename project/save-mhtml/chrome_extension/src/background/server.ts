@@ -15,7 +15,6 @@ export async function establish() {
   return true
 }
 
-
 export async function getArticles(from?: number, size?: number) {
   const url = new URL('articles', endpoint)
   const body = await fetch(url.toString()).then(res => res.json())
@@ -49,8 +48,9 @@ export function getArticleFile(id: number) {
 }
 
 export async function getArticleCheckedAnswer(aid: number) {
-  const target = '/article/answer'
+  const target = '/curation/answer'
   const url = `${endpoint}${target}?aid=${aid}`
+  console.log("TO SERVER", url)
   const body = await fetch(url).then(res => res.json())
   return body
 }
@@ -102,7 +102,7 @@ export function postNoContentAnswer(aid: number, uid: number) {
   formData.append("aid", aid.toString())
   formData.append("uid", uid.toString())
 
-  const target = "/answer/invalid"
+  const target = "/extractor/invalid"
   fetch(endpoint + target, {
     method: "POST",
     body: formData
@@ -113,13 +113,13 @@ export function postNoContentAnswer(aid: number, uid: number) {
   })
 }
 
-export function postExtractorReport(id: number, result: ExtractorResult[] | [ExtractorResult[], EvaluationReport[]]) {
+export function postExtractorResult(id: number, result: ExtractorResult[] | [ExtractorResult[], EvaluationReport[]]) {
   let formData = new FormData()
   formData.append('id', id.toString())
   formData.append('result', JSON.stringify(result))
   console.log("SENDING", result)
 
-  const target = "/article/extractor/report"
+  const target = "/extractor/result"
   fetch(endpoint + target, {
     method: "POST",
     body: formData

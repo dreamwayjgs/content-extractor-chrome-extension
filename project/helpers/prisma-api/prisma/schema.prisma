@@ -17,6 +17,7 @@ model article {
   crawl_log          crawl_log[]
   evaluation_result  evaluation_result[]
   extractor_result   extractor_result[]
+  naver_check_answer naver_check_answer[]
   page_block_attr    page_block_attr[]
   page_element_attrs page_element_attrs[]
 
@@ -150,4 +151,27 @@ model crawl_log {
   article    article? @relation(fields: [article_id], references: [id])
 
   @@unique([article_id, saved_at], name: "article_id_saved_at_unique")
+}
+
+model naver_check_answer {
+  uid              Int
+  div_tag_attrs    String?
+  div_xpath        String?
+  css_selector     String?
+  nav_xpath        String?
+  nav_selector     String?
+  invalid          Boolean?         @default(false)
+  id               Int              @id @default(autoincrement())
+  saved_at         DateTime?
+  article_id       Int
+  article          article          @relation(fields: [article_id], references: [id])
+  naver_check_user naver_check_user @relation(fields: [uid], references: [uid])
+}
+
+model naver_check_user {
+  uid                Int                  @id @default(autoincrement())
+  email              String?              @unique
+  name               String
+  password           String
+  naver_check_answer naver_check_answer[]
 }

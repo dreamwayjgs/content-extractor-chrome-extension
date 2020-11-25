@@ -1,5 +1,5 @@
 import Article, { ArticlePath } from "../entities/Article"
-import { getArticlesById, getArticleFile, getArticlesUrl, getArticleCheckedAnswer, postNoContentAnswer, postExtractorReport } from "./server"
+import { getArticleFile, getArticlesUrl, getArticleCheckedAnswer, postNoContentAnswer, postExtractorResult } from "./server"
 import { timestampedLog } from "../modules/debugger"
 import { ExtractorResult } from "../inject/extractors/extractor"
 import { EvaluationReport } from "../inject/evaluators/evaluator"
@@ -42,9 +42,7 @@ class Curator {
     return Curator.instance
   }
 
-  static async createCuratorWithSelectedIds(ids: number[], automatic = false) {
-    const body = await getArticlesById(ids)
-    const articles = Article.fromArray(body)
+  static async createCurator(articles: Article[], automatic = false) {
     Curator.instance = new Curator(articles)
     Curator.instance.automatic = automatic
     return Curator.instance
@@ -68,6 +66,7 @@ class Curator {
     else {
       //Popup: End of Pages
       timestampedLog("END of pages")
+      this.finish()
     }
   }
 
@@ -136,7 +135,6 @@ class Curator {
     setTimeout(() => {
       const article = this.articles[this.currentIndex]
       getArticleCheckedAnswer(article.id).then(body => {
-        // this.sendAnswerDataToPopup(body)
         this.sendAnswerDataToContentScript(body)
         if (this.automatic) {
           timestampedLog("Automatic curation")
@@ -165,12 +163,11 @@ class Curator {
         timestampedLog("In content", lastError);
       timestampedLog("From Content Response. Sending...")
       console.assert(response.length > 1, "Response is not an array " + this.tabId, response)
-      postExtractorReport(id, response)
+      postExtractorResult(id, response)
     })
   }
 
-  messageFromContentScriptHandler(request: any, sender: chrome.runtime.MessageSender,
-    sendResponse: (response: any) => void): void {
+  messageFromContentScriptHandler(request: any, sender: chrome.runtime.MessageSender): void {
     const info = request.info
     if (info === "curation-no-main-content") {
       timestampedLog("No main content from cs")

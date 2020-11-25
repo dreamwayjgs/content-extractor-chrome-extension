@@ -13,7 +13,7 @@ export function evaluate(answer: Answer, evaluatees: Extractor[]): EvaluationRep
   reports.push(evaluatees.map(evaluatee => (
     {
       report: lcsOnElements(answer.elem, evaluatee.extractedElement),
-      answer: answer.name,
+      answer: answer.naver_check_user.name,
       evaluatee: evaluatee.name,
       description: "LCS Evaluation on raw HTML and Text"
     }
@@ -21,7 +21,7 @@ export function evaluate(answer: Answer, evaluatees: Extractor[]): EvaluationRep
   reports.push(evaluatees.map(evaluatee => (
     {
       report: lcsOnElements(answer.elem, evaluatee.extractedElement, true),
-      answer: answer.name,
+      answer: answer.naver_check_user.name,
       evaluatee: evaluatee.name,
       description: "LCS Evaluation on HTML and Text reduced whitespaces"
     }
@@ -29,7 +29,7 @@ export function evaluate(answer: Answer, evaluatees: Extractor[]): EvaluationRep
   reports.push(evaluatees.map(evaluatee => (
     {
       report: iouF1Report(answer.elem, evaluatee.extractedElement),
-      answer: answer.name,
+      answer: answer.naver_check_user.name,
       evaluatee: evaluatee.name,
       description: "IoU Evaluation"
     }
@@ -37,7 +37,7 @@ export function evaluate(answer: Answer, evaluatees: Extractor[]): EvaluationRep
   reports.push(evaluatees.map(evaluatee => (
     {
       report: wordTokenReport(answer.elem, evaluatee.extractedElement),
-      answer: answer.name,
+      answer: answer.naver_check_user.name,
       evaluatee: evaluatee.name,
       description: "word token test"
     }

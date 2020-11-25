@@ -11,7 +11,9 @@ abstract class Overlay {
 
 export interface Answer {
   elem: HTMLElement,
-  name: string
+  naver_check_user: {
+    name: string
+  }
 }
 
 class AnswerOverlay extends Overlay {

@@ -1,6 +1,8 @@
 import { greet } from "./controller/hello"
-import { getArticleAction, getArticlesAction } from "./controller/NaverArticleCore"
-import { getArticleMHtmlAction, postArticleAction } from "./controller/NaverArticleFile"
+import { getArticleAction, getArticlesAction } from "./controller/ArticleCore"
+import { getArticleMHtmlAction, postArticleAction } from "./controller/ArticleFile"
+import { getCurationAnswerAction } from "./controller/ArticleCuration"
+import { postExtractorResultAction } from "./controller/ArticleExtractor"
 
 export const AppRoutes = [
   {
@@ -28,4 +30,14 @@ export const AppRoutes = [
     method: "get",
     action: getArticleMHtmlAction
   },
+  {
+    path: "/curation/answer",
+    method: "get",
+    action: getCurationAnswerAction
+  },
+  {
+    path: "/extractor/result",
+    method: "post",
+    action: postExtractorResultAction
+  }
 ]

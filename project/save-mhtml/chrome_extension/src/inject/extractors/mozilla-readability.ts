@@ -30,7 +30,8 @@ class MozReadabilityExtractor implements Extractor {
       result: this.extractedElement.outerHTML,
       raw: {
         article: article,
-        readable: isProbablyReaderable(document)
+        readable: isProbablyReaderable(document),
+        answer: answer
       }
     }
     return this.report
