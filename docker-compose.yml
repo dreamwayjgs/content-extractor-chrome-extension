@@ -8,5 +8,5 @@ services:
         stdin_open: true
         tty: true
         ports: 
-            - 53000:53000
+            - 54000:53000
     
