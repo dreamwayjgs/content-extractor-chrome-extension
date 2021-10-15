@@ -8,12 +8,7 @@ const look_col = [
   'similarity', 'text_count'
 ]
 
-const config: ClientConfig = {
-  user: 'postgres',
-  password: "rkskekfk",
-  database: "cssc",
-  host: "dumpdb.hanyang.ac.kr",
-  port: 54321
+const config: ClientConfig = {  
 }
 
 const client = new Client(config)
