@@ -8,7 +8,7 @@
     "@types/node": "^14.0.14",
     "@types/pg": "^7.14.3",
     "diff-sequences": "^26.3.0",
-    "jsdom": "^16.2.2",
+    "jsdom": "^16.5.0",
     "mhtml2html": "^3.0.0",
     "pg": "^8.2.1",
     "postgres-bytea": "^3.0.0",
